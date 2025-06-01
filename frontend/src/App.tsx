@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import type { VolunteerOpportunity } from "./types/VolunteerOpportunity";
+import { fetchOpportunities } from "./services/api";
+import { FilterBar } from "./components/FilterBar";
+import { OpportunityCard } from "./components/OpportunitiesCard";
 
-function App() {
-  const [count, setCount] = useState(0)
+export const Home = () => {
+  const [opps, setOpps] = useState<VolunteerOpportunity[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [category, setCategory] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchOpportunities()
+      .then(data => setOpps(data))
+      .catch(() => setError("Could not load data."))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = opps.filter(opp =>
+    opp.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (category ? opp.type === category : true)
+  );
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="p-4 max-w-5xl mx-auto">
+      <h1 className="text-3xl font-bold mb-4 text-center">Volunteer Opportunities</h1>
+      <FilterBar setSearchTerm={setSearchTerm} setCategory={setCategory} />
 
-export default App
+      {loading ? (
+        <p className="text-center text-gray-500">Loading...</p>
+      ) : error ? (
+        <p className="text-center text-red-500">{error}</p>
+      ) : filtered.length === 0 ? (
+        <p className="text-center text-gray-500">No opportunities found.</p>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {filtered.map(opp => <OpportunityCard key={opp.id} opportunity={opp} />)}
+        </div>
+      )}
+    </div>
+  );
+};
