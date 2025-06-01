@@ -1,7 +1,11 @@
 import express from "express";
+import cors from "cors";
+
 import { opportunities } from "./data/opportunities";
 
 const app = express();
+app.use(cors());
+
 const PORT = 3000;
 
 app.get("/opportunities", (req, res) => {
