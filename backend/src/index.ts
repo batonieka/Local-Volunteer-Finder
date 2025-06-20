@@ -21,6 +21,7 @@ app.get("/opportunities", (req, res) => {
     );
   }
 
+
   if (type) {
     filtered = filtered.filter(op => op.type.toLowerCase() === type);
   }

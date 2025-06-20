@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import type { VolunteerOpportunity } from "./types/VolunteerOpportunity";
-import { fetchOpportunities } from "./services/api";
-import { FilterBar } from "./components/FilterBar";
-import { OpportunityCard } from "./components/OpportunitiesCard";
+import type { VolunteerOpportunity } from "../src/types/VolunteerOpportunity";
+import { fetchOpportunities } from "../src/services/api";
+import { FilterBar } from "../src/components/FilterBar";
+import { OpportunityCard } from "../src/components/OpportunitiesCard";
 
-export const Home = () => {
+export const HomePage = () => {
   const [opps, setOpps] = useState<VolunteerOpportunity[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('');
