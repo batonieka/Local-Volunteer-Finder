@@ -1,27 +1,26 @@
-// src/pages/DetailsPage.tsx
-import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { VolunteerOpportunity } from '../types';
-import { fetchOpportunityById } from '../services/api';
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { type VolunteerOpportunity } from "../src/types/VolunteerOpportunity";
+import {  fetchOpportunities } from "../src/services/api";
 
 export const DetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const [opportunity, setOpportunity] = useState<VolunteerOpportunity | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (id) {
-      fetchOpportunityById(id)
+      fetchOpportunities(id)
         .then(setOpportunity)
         .catch(() => setError("Could not load opportunity."))
         .finally(() => setLoading(false));
     }
   }, [id]);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
-  if (!opportunity) return <p>Opportunity not found.</p>;
+  if (loading) return <p className="text-center">Loading...</p>;
+  if (error) return <p className="text-red-500 text-center">{error}</p>;
+  if (!opportunity) return <p className="text-center">Opportunity not found.</p>;
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
