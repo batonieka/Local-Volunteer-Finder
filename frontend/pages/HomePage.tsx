@@ -20,6 +20,14 @@ const filterReducer = (state: FilterState, action: FilterAction): FilterState =>
       return state;
   }
 };
+const [state, dispatch] = useReducer(filterReducer, {
+  searchTerm: '',
+  category: '',
+});
+ <FilterBar
+  setSearchTerm={(term) => dispatch({ type: 'SET_SEARCH_TERM', payload: term })}
+  setCategory={(cat) => dispatch({ type: 'SET_CATEGORY', payload: cat })}
+/>
 
 export const HomePage = () => {
   const [opps, setOpps] = useState<VolunteerOpportunity[]>([]);
