@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { type VolunteerOpportunity } from "../src/types/VolunteerOpportunity";
-import {  fetchOpportunities } from "../src/services/api";
+import { fetchOpportunityById } from "../src/services/api";
 
 export const DetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -11,7 +11,7 @@ export const DetailsPage = () => {
 
   useEffect(() => {
     if (id) {
-      fetchOpportunities(id)
+        fetchOpportunityById(id)
         .then(setOpportunity)
         .catch(() => setError("Could not load opportunity."))
         .finally(() => setLoading(false));
