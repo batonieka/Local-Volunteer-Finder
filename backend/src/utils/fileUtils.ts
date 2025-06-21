@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { VolunteerOpportunity } from '../types';
 
-const filePath = path.join(__dirname, '../../data/opportunities.json');
+const filePath = path.join(process.cwd(), 'src', 'data', 'opportunities.json');
 
 export async function readDataFromFile(): Promise<VolunteerOpportunity[]> {
   try {
@@ -19,5 +19,6 @@ export async function writeDataToFile(data: VolunteerOpportunity[]): Promise<voi
     await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
   } catch (err) {
     console.error("Error writing file:", err);
+    throw err;
   }
 }
