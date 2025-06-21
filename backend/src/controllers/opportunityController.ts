@@ -47,7 +47,6 @@ export const getOpportunityById = (req: Request, res: Response) => {
 export const createOpportunity = (req: Request, res: Response) => {
   const { title, description, date, location, type } = req.body;
 
-  // ✅ Enhanced validation for required fields
   if (
     typeof title !== 'string' || title.trim() === '' ||
     typeof description !== 'string' || description.trim() === '' ||
@@ -70,4 +69,38 @@ export const createOpportunity = (req: Request, res: Response) => {
   opportunities.push(newOpportunity);
 
   res.status(201).json(newOpportunity);
+};
+
+export const updateOpportunity = (req: Request, res: Response) => {
+  const { id } = req.params;
+  const index = opportunities.findIndex(op => op.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: "Opportunity not found" });
+  }
+
+  const { title, description, date, location, type } = req.body;
+
+  if (
+    typeof title !== 'string' || title.trim() === '' ||
+    typeof description !== 'string' || description.trim() === '' ||
+    typeof date !== 'string' || date.trim() === '' ||
+    typeof location !== 'string' || location.trim() === '' ||
+    typeof type !== 'string' || type.trim() === ''
+  ) {
+    return res.status(400).json({ error: "All fields must be non-empty strings." });
+  }
+
+  const updatedOpportunity: VolunteerOpportunity = {
+    id,
+    title: title.trim(),
+    description: description.trim(),
+    date: date.trim(),
+    location: location.trim(),
+    type: type.trim()
+  };
+
+  opportunities[index] = updatedOpportunity;
+
+  res.status(200).json(updatedOpportunity);
 };
