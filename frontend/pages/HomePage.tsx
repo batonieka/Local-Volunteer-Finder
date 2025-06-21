@@ -7,6 +7,7 @@ import { useDebounce } from "../src/hooks/useDebounce";
 import { OpportunityCardSkeleton } from "../src/components/OpportunityCardSkeleton";
 import { Pagination } from "../src/components/Pagination";
 import { useFetch } from "../src/hooks/useFetch";
+import styles from "../src/HomePage.module.css";
 
 // Reducer Setup
 type FilterState = { searchTerm: string; category: string };
@@ -60,7 +61,7 @@ const filtered = useMemo(() => {
   }, [filtered, currentPage]);
 
   return (
-    <div className="p-4 max-w-5xl mx-auto">
+    <div className={styles.container}>
       <h1 className="text-3xl font-bold mb-4 text-center">Volunteer Opportunities</h1>
 
       {/* FilterBar */}
