@@ -70,9 +70,21 @@ const filtered = useMemo(() => {
 
       {/* FilterBar */}
       <FilterBar
+        searchTerm={state.searchTerm}
+        category={state.category}
         setSearchTerm={(term) => dispatch({ type: "SET_SEARCH_TERM", payload: term })}
         setCategory={(category) => dispatch({ type: "SET_CATEGORY", payload: category })}
       />
+
+      <div className="mb-6 text-center">
+        <button
+           onClick={() => dispatch({ type: "RESET_FILTERS" })}
+           className="border border-gray-400 px-4 py-2 rounded hover:bg-gray-100 transition"
+          >
+        Reset Filters
+        </button>
+        </div>
+
 
       {/* Loading Skeleton */}
       {loading ? (
