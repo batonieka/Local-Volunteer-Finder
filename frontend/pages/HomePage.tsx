@@ -1,6 +1,5 @@
 import { useEffect, useReducer, useState, useMemo, type SetStateAction } from "react";
 import { type VolunteerOpportunity } from "../src/types/VolunteerOpportunity";
-import { fetchOpportunities } from "../src/services/api";
 import { FilterBar } from "../src/components/FilterBar";
 import { OpportunityCard } from "../src/components/OpportunitiesCard";
 import { useDebounce } from "../src/hooks/useDebounce";

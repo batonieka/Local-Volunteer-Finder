@@ -1,7 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { type VolunteerOpportunity } from "../src/types/VolunteerOpportunity";
-import { fetchOpportunityById } from "../src/services/api";
 import { useFetch } from "../src/hooks/useFetch";
 
 export const DetailsPage = () => {

@@ -10,3 +10,6 @@ export const fetchOpportunityById = async (id: string) => {
   if (!res.ok) throw new Error('Failed to fetch opportunity');
   return res.json();
 };
+
+
+//this is not used anywhere rn but i decided to keep in case i might need it later. ive converted all uses to hooks and usefetch:)
