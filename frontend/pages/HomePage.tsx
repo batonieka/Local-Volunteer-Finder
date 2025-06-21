@@ -111,20 +111,22 @@ export const HomePage = () => {
 
 
       {/* Loading Skeleton */}
-      {loading ? (
-        <div role="status" aria-live="polite">
-          <p className="sr-only">Loading volunteer opportunities...</p>
-          <div className="grid gap-4 md:grid-cols-2">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <OpportunityCardSkeleton key={i} />
-            ))}
-          </div>
-        </div>
-      ) : error ? (
-        <p role="alert" className="text-red-500 text-center">{error}</p>
-      ) : filtered.length === 0 ? (
-        <p className="text-center text-gray-500">No opportunities found.</p>
-      ) : (
+     {loading ? (
+  <div role="status" aria-live="polite">
+    <p className="sr-only">Loading volunteer opportunities...</p>
+    ...
+  </div>
+) : error ? (
+  <p className="text-red-500 text-center" role="alert">
+    Oops! Something went wrong. Please try refreshing the page.
+  </p>
+) : filtered.length === 0 ? (
+  <p className="text-center text-gray-500">
+    {state.searchTerm || state.category
+      ? "No opportunities match your current filters. Try adjusting your search."
+      : "No volunteer opportunities available at the moment."}
+  </p>
+) : (
         <>
           <ul className="grid gap-4 md:grid-cols-2">
             {paginated.map((opp: VolunteerOpportunity) => (
