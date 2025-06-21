@@ -6,7 +6,7 @@
     "date": "2025-06-10",
     "location": "Central Park",
     "type": "environmental",
-    "requiredSkills": ["teamwork", "physical fitness"],
+    "requiredSkills": ["teamwork", "physical stamina"],
     "status": "open"
   },
   {
@@ -16,7 +16,7 @@
     "date": "2025-06-12",
     "location": "Community Center",
     "type": "education",
-    "requiredSkills": ["math", "patience", "reading"],
+    "requiredSkills": ["patience", "subject knowledge"],
     "status": "open"
   }
 ]

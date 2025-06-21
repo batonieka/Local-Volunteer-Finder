@@ -5,6 +5,6 @@ export interface VolunteerOpportunity {
   date: string;
   location: string;
   type: string;
-  requiredSkills: string[]; // ✅ Add this line
-  status: string;
+  requiredSkills: string[]; // New
+  status: 'open' | 'full' | 'completed'; // New
 }
