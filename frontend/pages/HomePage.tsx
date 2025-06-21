@@ -8,7 +8,7 @@ import { Pagination } from "../src/components/Pagination";
 import { useFetch } from "../src/hooks/useFetch";
 import styles from "../src/HomePage.module.css";
 import { fetchOpportunities } from "../src/services/api";
-;
+
 
 // Reducer Setup
 type FilterState = { searchTerm: string; category: string };
@@ -47,15 +47,33 @@ export const HomePage = () => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
+  const [sortOrder, setSortOrder] = useState("");
 
   // Filtering with useMemo
   const filtered = useMemo(() => {
-    return (opps ?? []).filter(
-      (opp: { title: string; type: string; }) =>
-        opp.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) &&
-        (state.category ? opp.type === state.category : true)
-    );
-  }, [opps, debouncedSearchTerm, state.category]);
+  let result = (opps ?? []).filter(
+    (opp: { title: string; type: string; }) =>
+      opp.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) &&
+      (state.category ? opp.type === state.category : true)
+  );
+
+  switch (sortOrder) {
+    case "date-desc":
+      result.sort((a: { date: string | number | Date; }, b: { date: string | number | Date; }) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      break;
+    case "date-asc":
+      result.sort((a: { date: string | number | Date; }, b: { date: string | number | Date; }) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      break;
+    case "title-asc":
+      result.sort((a: { title: string; }, b: { title: any; }) => a.title.localeCompare(b.title));
+      break;
+    case "title-desc":
+      result.sort((a: { title: any; }, b: { title: string; }) => b.title.localeCompare(a.title));
+      break;
+  }
+
+  return result;
+}, [opps, debouncedSearchTerm, state.category, sortOrder]);
 
 
   // Pagination with useMemo
@@ -73,8 +91,9 @@ export const HomePage = () => {
         searchTerm={state.searchTerm}
         category={state.category}
         setSearchTerm={(term) => dispatch({ type: "SET_SEARCH_TERM", payload: term })}
-        setCategory={(category) => dispatch({ type: "SET_CATEGORY", payload: category })}
-      />
+        setCategory={(category) => dispatch({ type: "SET_CATEGORY", payload: category })} sortOrder={""} setSortOrder={function (order: string): void {
+          throw new Error("Function not implemented.");
+        } }      />
 
       <div className="mb-6 text-center">
         <button

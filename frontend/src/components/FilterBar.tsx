@@ -1,35 +1,57 @@
-interface FilterBarProps {
+type FilterBarProps = {
   searchTerm: string;
   category: string;
   setSearchTerm: (term: string) => void;
   setCategory: (category: string) => void;
-}
-
+  sortOrder: string;
+  setSortOrder: (order: string) => void;
+};
 export const FilterBar = ({
   searchTerm,
   category,
   setSearchTerm,
   setCategory,
+  sortOrder,
+  setSortOrder,
 }: FilterBarProps) => {
   return (
-    <div className="flex flex-col md:flex-row gap-4 mb-6">
+    <div className="flex flex-wrap gap-4 items-center justify-between mb-6">
+      {/* Search Input */}
       <input
         type="text"
-        placeholder="Search by title..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="border p-2 rounded w-full md:w-1/2"
+        placeholder="Search..."
+        aria-label="Search opportunities"
+        className="border px-2 py-1 rounded"
       />
+
+      {/* Category Dropdown */}
       <select
         value={category}
         onChange={(e) => setCategory(e.target.value)}
-        className="border p-2 rounded w-full md:w-1/3"
+        aria-label="Filter by category"
+        className="border px-2 py-1 rounded"
       >
         <option value="">All Categories</option>
-        <option value="Environmental">Environmental</option>
-        <option value="Education">Education</option>
+        <option value="Environment">Environment</option>
         <option value="Health">Health</option>
-        <option value="Community">Community</option>
+        <option value="Education">Education</option>
+        {/* Add more categories as needed */}
+      </select>
+
+      {/* ✅ Sort Order Dropdown */}
+      <select
+        value={sortOrder}
+        onChange={(e) => setSortOrder(e.target.value)}
+        aria-label="Sort opportunities"
+        className="border px-2 py-1 rounded"
+      >
+        <option value="">Sort by</option>
+        <option value="date-desc">Date: Newest First</option>
+        <option value="date-asc">Date: Oldest First</option>
+        <option value="title-asc">Title: A-Z</option>
+        <option value="title-desc">Title: Z-A</option>
       </select>
     </div>
   );
