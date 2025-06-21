@@ -1,14 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es2016",                       // Modern JS features
-    "module": "commonjs",                     // CommonJS module system (Node.js default)
-    "moduleResolution": "node",               // So it resolves node_modules and local imports
-    "baseUrl": "./src",                       // Allow imports relative to src/
-    "esModuleInterop": true,                  // Required for importing CommonJS modules
-    "forceConsistentCasingInFileNames": true, // Avoid import path casing bugs
-    "strict": true,                           // Enable all strict type checks
-    "skipLibCheck": true                      // Skip checking declaration files in node_modules
-  },
-  "include": ["src"],                         // Include all code in src/
-  "exclude": ["node_modules", "dist"]         // Ignore build output and dependencies
+    "target": "es2016",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",          // Make sure this is included
+    "types": ["node", "express"]         // Add this line if missing
+  }
 }
