@@ -2,21 +2,14 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { type VolunteerOpportunity } from "../src/types/VolunteerOpportunity";
 import { fetchOpportunityById } from "../src/services/api";
+import { useFetch } from "../src/hooks/useFetch";
 
 export const DetailsPage = () => {
   const { id } = useParams<{ id: string }>();
-  const [opportunity, setOpportunity] = useState<VolunteerOpportunity | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+const { data: opportunity, loading, error } = useFetch<VolunteerOpportunity>(
+  `http://localhost:3000/opportunities/${id}`
+);
 
-  useEffect(() => {
-    if (id) {
-        fetchOpportunityById(id)
-        .then(setOpportunity)
-        .catch(() => setError("Could not load opportunity."))
-        .finally(() => setLoading(false));
-    }
-  }, [id]);
 
   if (loading) return <p className="text-center">Loading...</p>;
   if (error) return <p className="text-red-500 text-center">{error}</p>;

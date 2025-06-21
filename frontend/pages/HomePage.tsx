@@ -6,6 +6,7 @@ import { OpportunityCard } from "../src/components/OpportunitiesCard";
 import { useDebounce } from "../src/hooks/useDebounce";
 import { OpportunityCardSkeleton } from "../src/components/OpportunityCardSkeleton";
 import { Pagination } from "../components/Pagination";
+import { useFetch } from "../src/hooks/useFetch";
 
 // Reducer
 type FilterState = { searchTerm: string; category: string };
@@ -35,16 +36,8 @@ export const HomePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  const [opps, setOpps] = useState<VolunteerOpportunity[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+ const { data: opps = [], loading, error } = useFetch<VolunteerOpportunity[]>("http://localhost:3000/opportunities");
 
-  useEffect(() => {
-    fetchOpportunities()
-      .then(setOpps)
-      .catch(() => setError("Could not load data."))
-      .finally(() => setLoading(false));
-  }, []);
 
   const filtered = useMemo(() => {
     return opps.filter(opp =>
