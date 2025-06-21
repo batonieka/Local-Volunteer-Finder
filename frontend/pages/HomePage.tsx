@@ -8,7 +8,7 @@ import { Pagination } from "../src/components/Pagination";
 import { useFetch } from "../src/hooks/useFetch";
 import styles from "../src/HomePage.module.css";
 import { fetchOpportunities } from "../src/services/api";
-;
+
 
 // Reducer Setup
 type FilterState = { searchTerm: string; category: string };
@@ -47,15 +47,38 @@ export const HomePage = () => {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
+  const [sortOrder, setSortOrder] = useState("");
 
   // Filtering with useMemo
   const filtered = useMemo(() => {
-    return (opps ?? []).filter(
-      (opp: { title: string; type: string; }) =>
-        opp.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) &&
-        (state.category ? opp.type === state.category : true)
-    );
-  }, [opps, debouncedSearchTerm, state.category]);
+  let result = (opps ?? []).filter(
+    (opp: { title: string; type: string; }) =>
+      opp.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) &&
+      (state.category ? opp.type === state.category : true)
+  );
+
+  switch (sortOrder) {
+    case "date-desc":
+      result.sort((a: { date: string | number | Date; }, b: { date: string | number | Date; }) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      break;
+    case "date-asc":
+      result.sort((a: { date: string | number | Date; }, b: { date: string | number | Date; }) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      break;
+    case "title-asc":
+      result.sort((a: { title: string; }, b: { title: any; }) => a.title.localeCompare(b.title));
+      break;
+    case "title-desc":
+      result.sort((a: { title: any; }, b: { title: string; }) => b.title.localeCompare(a.title));
+      break;
+  }
+
+  return result;
+}, [opps, debouncedSearchTerm, state.category, sortOrder]);
+
+
+  useEffect(() => {
+  setCurrentPage(1);
+}, [state.searchTerm, state.category, sortOrder]);
 
 
   // Pagination with useMemo
@@ -72,9 +95,11 @@ export const HomePage = () => {
       <FilterBar
         searchTerm={state.searchTerm}
         category={state.category}
+        aria-controls="opportunity-list"
         setSearchTerm={(term) => dispatch({ type: "SET_SEARCH_TERM", payload: term })}
-        setCategory={(category) => dispatch({ type: "SET_CATEGORY", payload: category })}
-      />
+        setCategory={(category) => dispatch({ type: "SET_CATEGORY", payload: category })} sortOrder={""} setSortOrder={function (order: string): void {
+          throw new Error("Function not implemented.");
+        } }      />
 
       <div className="mb-6 text-center">
         <button
@@ -87,28 +112,36 @@ export const HomePage = () => {
 
 
       {/* Loading Skeleton */}
-      {loading ? (
-        <div role="status" aria-live="polite">
-          <p className="sr-only">Loading volunteer opportunities...</p>
-          <div className="grid gap-4 md:grid-cols-2">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <OpportunityCardSkeleton key={i} />
-            ))}
-          </div>
-        </div>
-      ) : error ? (
-        <p role="alert" className="text-red-500 text-center">{error}</p>
-      ) : filtered.length === 0 ? (
-        <p className="text-center text-gray-500">No opportunities found.</p>
-      ) : (
-        <>
-          <ul className="grid gap-4 md:grid-cols-2">
-            {paginated.map((opp: VolunteerOpportunity) => (
-              <li key={opp.id}>
-                <OpportunityCard opportunity={opp} />
-              </li>
-            ))}
-          </ul>
+     {loading ? (
+  <div role="status" aria-live="polite">
+    <p className="sr-only">Loading volunteer opportunities...</p>
+    <div className="grid gap-4 md:grid-cols-2">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <OpportunityCardSkeleton key={i} />
+      ))}
+    </div>
+  </div>
+) : error ? (
+  <p role="alert" className="text-red-500 text-center">
+    {error}
+  </p>
+) : filtered.length === 0 ? (
+  <p className="text-center text-gray-500">
+    {state.searchTerm || state.category
+      ? "No opportunities match your current filters. Try adjusting your search."
+      : "No volunteer opportunities found."}
+  </p>
+) : (        <>
+          <ul
+  id="opportunity-list"
+  className="grid gap-4 md:grid-cols-2"
+>
+  {paginated.map((opp: VolunteerOpportunity) => (
+    <li key={opp.id}>
+      <OpportunityCard opportunity={opp} />
+    </li>
+  ))}
+</ul>
 
 
 

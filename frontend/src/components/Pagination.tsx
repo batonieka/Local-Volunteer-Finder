@@ -4,31 +4,47 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export const Pagination = ({
-  currentPage,
-  totalPages,
-  onPageChange,
-}: PaginationProps) => {
+export const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+  for (let i = 1; i <= totalPages; i++) {
+    pages.push(i);
+  }
+
   return (
     <nav
+      className="flex justify-center mt-4 gap-2"
       role="navigation"
       aria-label="Pagination"
-      className="flex justify-center mt-4 gap-4"
     >
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="px-4 py-2 border rounded disabled:opacity-50"
+        aria-label="Go to previous page"
+        className="px-3 py-1 border rounded disabled:opacity-50"
       >
-        Previous
+        Prev
       </button>
-      <span className="px-4 py-2">
-        Page {currentPage} of {totalPages}
-      </span>
+
+      {pages.map((page) => (
+        <button
+          key={page}
+          onClick={() => onPageChange(page)}
+          className={`px-3 py-1 border rounded ${
+            page === currentPage ? "bg-blue-600 text-white" : ""
+          }`}
+          aria-label={`Go to page ${page}`}
+          aria-current={page === currentPage ? "page" : undefined}
+        >
+          {page}
+        </button>
+      ))}
+
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-4 py-2 border rounded disabled:opacity-50"
+        aria-label="Go to next page"
+        className="px-3 py-1 border rounded disabled:opacity-50"
       >
         Next
       </button>
