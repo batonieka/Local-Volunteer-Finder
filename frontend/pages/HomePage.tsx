@@ -13,7 +13,8 @@ import styles from "../src/HomePage.module.css";
 type FilterState = { searchTerm: string; category: string };
 type FilterAction =
   | { type: "SET_SEARCH_TERM"; payload: string }
-  | { type: "SET_CATEGORY"; payload: string };
+  | { type: "SET_CATEGORY"; payload: string }
+  | { type: "RESET_FILTERS" };
 
 const filterReducer = (state: FilterState, action: FilterAction): FilterState => {
   switch (action.type) {
@@ -21,10 +22,13 @@ const filterReducer = (state: FilterState, action: FilterAction): FilterState =>
       return { ...state, searchTerm: action.payload };
     case "SET_CATEGORY":
       return { ...state, category: action.payload };
+    case "RESET_FILTERS":
+      return { searchTerm: "", category: "" }
     default:
       return state;
   }
 };
+
 
 export const HomePage = () => {
   // Filter state
