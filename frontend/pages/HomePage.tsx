@@ -120,6 +120,6 @@ const filtered = useMemo(() => {
           />
         </>
       )}
-    </div>
+    </main>
   );
 };
