@@ -1,6 +1,6 @@
 import { useLocalStorage } from "../src/hooks/useLocalStorage";
 import { useFetch } from "../src/hooks/useFetch";
-import { VolunteerOpportunity } from "../src/types/VolunteerOpportunity";
+import type { VolunteerOpportunity } from "../src/types/VolunteerOpportunity";
 import { fetchOpportunities } from "../src/services/api";
 import { OpportunityCard } from "../src/components/OpportunitiesCard";
 
@@ -8,7 +8,7 @@ export const SavedPage = () => {
   const [savedIds] = useLocalStorage<string[]>("saved", []);
   const { data: opportunities = [], loading, error } = useFetch(fetchOpportunities);
 
-  const savedOpportunities = opportunities.filter((opp) => savedIds.includes(opp.id));
+  const savedOpportunities = opportunities.filter((opp: { id: string; }) => savedIds.includes(opp.id));
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -21,7 +21,7 @@ export const SavedPage = () => {
         <p>No saved opportunities found.</p>
       ) : (
         <ul className="grid gap-4 md:grid-cols-2">
-          {savedOpportunities.map((opp) => (
+          {savedOpportunities.map((opp: VolunteerOpportunity) => (
             <li key={opp.id}>
               <OpportunityCard opportunity={opp} />
             </li>

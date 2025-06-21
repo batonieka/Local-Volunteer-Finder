@@ -1,23 +1,50 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
-export function useFetch<T>(fetchFn: () => Promise<T>) {
+export function useFetch<T>(fetchFn: () => Promise<T> | null, deps: any[] = []) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
-    setLoading(true);
+  // Keep track of mounted state to avoid setting state on unmounted component
+  const isMounted = useRef(true);
 
-    fetchFn()
-      .then((res) => mounted && setData(res))
-      .catch(() => mounted && setError("Failed to fetch data"))
-      .finally(() => mounted && setLoading(false));
+  useEffect(() => {
+    isMounted.current = true;
+
+    const fetchData = async () => {
+      const promise = fetchFn();
+      if (!promise) {
+        if (isMounted.current) {
+          setLoading(false);
+        }
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const result = await promise;
+        if (isMounted.current) {
+          setData(result);
+          setError(null);
+        }
+      } catch (err: any) {
+        if (isMounted.current) {
+          setError(err.message || "Unknown error");
+          setData(null);
+        }
+      } finally {
+        if (isMounted.current) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchData();
 
     return () => {
-      mounted = false;
+      isMounted.current = false; // cleanup on unmount
     };
-  }, [fetchFn]);
+  }, deps);
 
   return { data, loading, error };
 }

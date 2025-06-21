@@ -5,7 +5,7 @@
     "description": "Help clean up the local park.",
     "date": "2025-06-10",
     "location": "Central Park",
-    "type": "environmental",
+    "type": "Environmental",
     "requiredSkills": ["Teamwork", "Physical stamina"],
     "status": "open"
   },
@@ -15,7 +15,7 @@
     "description": "Tutor elementary school children in math and reading.",
     "date": "2025-06-12",
     "location": "Community Center",
-    "type": "education",
+    "type": "Education",
     "requiredSkills": ["Patience", "Teaching", "Communication"],
     "status": "open"
   },
@@ -25,7 +25,7 @@
     "description": "Help sort and distribute food to families in need.",
     "date": "2025-06-15",
     "location": "Local Food Bank",
-    "type": "community",
+    "type": "Community",
     "requiredSkills": ["Organization", "Lifting", "Efficiency"],
     "status": "full"
   },
@@ -35,7 +35,7 @@
     "description": "Feed and take care of animals in the shelter.",
     "date": "2025-06-18",
     "location": "Happy Paws Shelter",
-    "type": "animal care",
+    "type": "Animal care",
     "requiredSkills": ["Animal handling", "Responsibility", "Cleaning"],
     "status": "open"
   },
@@ -45,7 +45,7 @@
     "description": "Join our group in cleaning up the beach area.",
     "date": "2025-06-20",
     "location": "Seaside",
-    "type": "environmental",
+    "type": "Environmental",
     "requiredSkills": ["Teamwork", "Endurance"],
     "status": "completed"
   },
@@ -55,7 +55,7 @@
     "description": "Spend time with elderly people in retirement homes.",
     "date": "2025-06-22",
     "location": "Sunset Seniors Center",
-    "type": "caregiving",
+    "type": "Caregiving",
     "requiredSkills": ["Empathy", "Communication", "Patience"],
     "status": "open"
   },
@@ -65,7 +65,7 @@
     "description": "Teach basic smartphone and computer skills to seniors.",
     "date": "2025-06-25",
     "location": "Library Tech Room",
-    "type": "education",
+    "type": "Education",
     "requiredSkills": ["Tech-savvy", "Teaching", "Patience"],
     "status": "open"
   },
@@ -75,7 +75,7 @@
     "description": "Help plant trees around the city to promote green living.",
     "date": "2025-06-27",
     "location": "Downtown District",
-    "type": "environmental",
+    "type": "Environmental",
     "requiredSkills": ["Gardening", "Teamwork", "Physical work"],
     "status": "full"
   },
@@ -85,7 +85,7 @@
     "description": "Assist in organizing and shelving books at the local library.",
     "date": "2025-06-29",
     "location": "City Library",
-    "type": "community",
+    "type": "Community",
     "requiredSkills": ["Organization", "Attention to detail"],
     "status": "open"
   },
@@ -95,7 +95,7 @@
     "description": "Capture volunteer events and community moments.",
     "date": "2025-07-01",
     "location": "Various Event Locations",
-    "type": "creative",
+    "type": "Creative",
     "requiredSkills": ["Photography", "Creativity", "Punctuality"],
     "status": "open"
   }
