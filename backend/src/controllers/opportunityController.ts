@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { VolunteerOpportunity } from '../types';
 import { readDataFromFile, writeDataToFile } from '../utils/fileUtils';
 
-export const getAllOpportunities = async (req: Request, res: Response) => {
+export const getAllOpportunities = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const opportunities = await readDataFromFile();
 
@@ -68,12 +68,11 @@ export const getAllOpportunities = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Error in getAllOpportunities:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    next(error);
   }
 };
 
-export const getOpportunityById = async (req: Request, res: Response) => {
+export const getOpportunityById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const opportunities = await readDataFromFile();
     const opportunity = opportunities.find(op => op.id === req.params.id);
@@ -82,12 +81,11 @@ export const getOpportunityById = async (req: Request, res: Response) => {
     }
     res.json(opportunity);
   } catch (error) {
-    console.error('Error in getOpportunityById:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    next(error);
   }
 };
 
-export const createOpportunity = async (req: Request, res: Response) => {
+export const createOpportunity = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { title, description, date, location, type, requiredSkills, status } = req.body;
 
@@ -128,12 +126,11 @@ export const createOpportunity = async (req: Request, res: Response) => {
 
     res.status(201).json(newOpportunity);
   } catch (error) {
-    console.error('Error in createOpportunity:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    next(error);
   }
 };
 
-export const updateOpportunity = async (req: Request, res: Response) => {
+export const updateOpportunity = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const opportunities = await readDataFromFile();
     const index = opportunities.findIndex(op => op.id === req.params.id);
@@ -182,12 +179,11 @@ export const updateOpportunity = async (req: Request, res: Response) => {
 
     res.json(updated);
   } catch (error) {
-    console.error('Error in updateOpportunity:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    next(error);
   }
 };
 
-export const deleteOpportunity = async (req: Request, res: Response) => {
+export const deleteOpportunity = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const opportunities = await readDataFromFile();
     const index = opportunities.findIndex(op => op.id === req.params.id);
@@ -200,7 +196,6 @@ export const deleteOpportunity = async (req: Request, res: Response) => {
 
     res.status(204).send();
   } catch (error) {
-    console.error('Error in deleteOpportunity:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    next(error);
   }
 };

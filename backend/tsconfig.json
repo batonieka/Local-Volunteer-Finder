@@ -2,11 +2,15 @@
   "compilerOptions": {
     "target": "es2016",
     "module": "commonjs",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "moduleResolution": "node",          // Make sure this is included
-    "types": ["jest", "node"]         // Add this line if missing
-  }
+    "moduleResolution": "node",
+    "types": ["jest", "node"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }
