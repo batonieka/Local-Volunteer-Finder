@@ -1,3 +1,4 @@
+// opportunityController.ts
 import { Request, Response } from 'express';
 import { opportunities } from '../data/opportunities';
 import { VolunteerOpportunity } from '../types';
@@ -103,4 +104,17 @@ export const updateOpportunity = (req: Request, res: Response) => {
   opportunities[index] = updatedOpportunity;
 
   res.status(200).json(updatedOpportunity);
+};
+
+export const deleteOpportunity = (req: Request, res: Response) => {
+  const { id } = req.params;
+  const index = opportunities.findIndex(op => op.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: "Opportunity not found" });
+  }
+
+  opportunities.splice(index, 1);
+
+  res.status(204).send();
 };

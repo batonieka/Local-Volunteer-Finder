@@ -1,3 +1,4 @@
+// types.ts
 export interface VolunteerOpportunity {
   id: string;
   title: string;
