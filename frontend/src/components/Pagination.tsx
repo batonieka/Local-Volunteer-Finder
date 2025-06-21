@@ -5,14 +5,18 @@ interface PaginationProps {
 }
 
 export const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
-  const pages = [];
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   for (let i = 1; i <= totalPages; i++) {
     pages.push(i);
   }
 
   return (
-    <nav className="flex justify-center mt-4 gap-2" role="navigation" aria-label="Pagination">
+    <nav
+      className="flex justify-center mt-4 gap-2"
+      role="navigation"
+      aria-label="Pagination"
+    >
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
@@ -21,15 +25,21 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
       >
         Prev
       </button>
+
       {pages.map((page) => (
         <button
           key={page}
           onClick={() => onPageChange(page)}
-          className={`px-3 py-1 border rounded ${page === currentPage ? "bg-blue-600 text-white" : ""}`}
+          className={`px-3 py-1 border rounded ${
+            page === currentPage ? "bg-blue-600 text-white" : ""
+          }`}
+          aria-label={`Go to page ${page}`}
+          aria-current={page === currentPage ? "page" : undefined}
         >
           {page}
         </button>
       ))}
+
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}

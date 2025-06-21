@@ -19,13 +19,13 @@ export const FilterBar = ({
       {/* Search Input */}
       <div className="relative">
   <input
-    type="text"
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    placeholder="Search..."
-    aria-label="Search opportunities"
-    className="border px-2 py-1 rounded"
-  />
+  type="text"
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  placeholder="Search..."
+  aria-label="Search opportunities"
+  className="border px-2 py-1 rounded"
+/>
   {searchTerm && (
     <button
       type="button"

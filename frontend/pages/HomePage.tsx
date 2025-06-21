@@ -95,6 +95,7 @@ export const HomePage = () => {
       <FilterBar
         searchTerm={state.searchTerm}
         category={state.category}
+        aria-controls="opportunity-list"
         setSearchTerm={(term) => dispatch({ type: "SET_SEARCH_TERM", payload: term })}
         setCategory={(category) => dispatch({ type: "SET_CATEGORY", payload: category })} sortOrder={""} setSortOrder={function (order: string): void {
           throw new Error("Function not implemented.");
@@ -114,27 +115,33 @@ export const HomePage = () => {
      {loading ? (
   <div role="status" aria-live="polite">
     <p className="sr-only">Loading volunteer opportunities...</p>
-    ...
+    <div className="grid gap-4 md:grid-cols-2">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <OpportunityCardSkeleton key={i} />
+      ))}
+    </div>
   </div>
 ) : error ? (
-  <p className="text-red-500 text-center" role="alert">
-    Oops! Something went wrong. Please try refreshing the page.
+  <p role="alert" className="text-red-500 text-center">
+    {error}
   </p>
 ) : filtered.length === 0 ? (
   <p className="text-center text-gray-500">
     {state.searchTerm || state.category
       ? "No opportunities match your current filters. Try adjusting your search."
-      : "No volunteer opportunities available at the moment."}
+      : "No volunteer opportunities found."}
   </p>
-) : (
-        <>
-          <ul className="grid gap-4 md:grid-cols-2">
-            {paginated.map((opp: VolunteerOpportunity) => (
-              <li key={opp.id}>
-                <OpportunityCard opportunity={opp} />
-              </li>
-            ))}
-          </ul>
+) : (        <>
+          <ul
+  id="opportunity-list"
+  className="grid gap-4 md:grid-cols-2"
+>
+  {paginated.map((opp: VolunteerOpportunity) => (
+    <li key={opp.id}>
+      <OpportunityCard opportunity={opp} />
+    </li>
+  ))}
+</ul>
 
 
 
