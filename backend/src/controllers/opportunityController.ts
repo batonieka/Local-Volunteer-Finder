@@ -1,7 +1,6 @@
-// opportunityController.ts
 import { Request, Response } from 'express';
-import { opportunities } from '../data/opportunities';
 import { VolunteerOpportunity } from '../types';
+import { readDataFromFile, writeDataToFile } from '../utils/fileUtils';
 
 export const getAllOpportunities = (req: Request, res: Response) => {
   const keyword = req.query.keyword?.toString().toLowerCase();
@@ -9,112 +8,110 @@ export const getAllOpportunities = (req: Request, res: Response) => {
   const sortBy = req.query.sortBy?.toString();
   const order = req.query.order?.toString() || 'asc';
 
-  let filtered = opportunities;
+  let opportunities = readDataFromFile();
 
   if (keyword) {
-    filtered = filtered.filter(op =>
+    opportunities = opportunities.filter(op =>
       op.title.toLowerCase().includes(keyword) ||
       op.description.toLowerCase().includes(keyword)
     );
   }
 
   if (type) {
-    filtered = filtered.filter(op => op.type.toLowerCase() === type);
+    opportunities = opportunities.filter(op => op.type.toLowerCase() === type);
   }
 
   if (sortBy === 'date' || sortBy === 'title') {
-    filtered.sort((a, b) => {
-      const aVal = a[sortBy].toLowerCase();
-      const bVal = b[sortBy].toLowerCase();
+    opportunities.sort((a, b) => {
+      const aValue = a[sortBy].toLowerCase();
+      const bValue = b[sortBy].toLowerCase();
       return order === 'desc'
-        ? bVal.localeCompare(aVal)
-        : aVal.localeCompare(bVal);
+        ? bValue.localeCompare(aValue)
+        : aValue.localeCompare(bValue);
     });
   }
 
-  res.json(filtered);
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 10;
+  const startIndex = (page - 1) * limit;
+  const paginated = opportunities.slice(startIndex, startIndex + limit);
+
+  res.json(paginated);
 };
 
 export const getOpportunityById = (req: Request, res: Response) => {
-  const opportunity = opportunities.find(op => op.id === req.params.id);
-
-  if (!opportunity) {
-    return res.status(404).json({ error: 'Opportunity not found' });
-  }
-
-  res.json(opportunity);
+  const opportunities = readDataFromFile();
+  const found = opportunities.find(op => op.id === req.params.id);
+  if (!found) return res.status(404).json({ error: 'Opportunity not found' });
+  res.json(found);
 };
 
 export const createOpportunity = (req: Request, res: Response) => {
-  const { title, description, date, location, type } = req.body;
+  const { title, description, date, location, type, requiredSkills, status } = req.body;
 
-  if (
-    typeof title !== 'string' || title.trim() === '' ||
-    typeof description !== 'string' || description.trim() === '' ||
-    typeof date !== 'string' || date.trim() === '' ||
-    typeof location !== 'string' || location.trim() === '' ||
-    typeof type !== 'string' || type.trim() === ''
-  ) {
-    return res.status(400).json({ error: "All fields must be non-empty strings." });
+  if (!title || !description || !date || !location || !type || !Array.isArray(requiredSkills) || !status) {
+    return res.status(400).json({ error: 'Missing or invalid required fields' });
   }
 
   const newOpportunity: VolunteerOpportunity = {
     id: Date.now().toString(),
-    title: title.trim(),
-    description: description.trim(),
-    date: date.trim(),
-    location: location.trim(),
-    type: type.trim()
+    title,
+    description,
+    date,
+    location,
+    type,
+    requiredSkills,
+    status
   };
 
+  const opportunities = readDataFromFile();
   opportunities.push(newOpportunity);
+  writeDataToFile(opportunities);
 
   res.status(201).json(newOpportunity);
 };
 
 export const updateOpportunity = (req: Request, res: Response) => {
-  const { id } = req.params;
-  const index = opportunities.findIndex(op => op.id === id);
+  const { title, description, date, location, type, requiredSkills, status } = req.body;
 
-  if (index === -1) {
-    return res.status(404).json({ error: "Opportunity not found" });
+  if (!title || !description || !date || !location || !type || !Array.isArray(requiredSkills) || !status) {
+    return res.status(400).json({ error: 'Missing or invalid required fields' });
   }
 
-  const { title, description, date, location, type } = req.body;
+  const opportunities = readDataFromFile();
+  const index = opportunities.findIndex(op => op.id === req.params.id);
 
-  if (
-    typeof title !== 'string' || title.trim() === '' ||
-    typeof description !== 'string' || description.trim() === '' ||
-    typeof date !== 'string' || date.trim() === '' ||
-    typeof location !== 'string' || location.trim() === '' ||
-    typeof type !== 'string' || type.trim() === ''
-  ) {
-    return res.status(400).json({ error: "All fields must be non-empty strings." });
+  if (index === -1) {
+    return res.status(404).json({ error: 'Opportunity not found' });
   }
 
   const updatedOpportunity: VolunteerOpportunity = {
-    id,
-    title: title.trim(),
-    description: description.trim(),
-    date: date.trim(),
-    location: location.trim(),
-    type: type.trim()
+    id: req.params.id,
+    title,
+    description,
+    date,
+    location,
+    type,
+    requiredSkills,
+    status
   };
 
   opportunities[index] = updatedOpportunity;
+  writeDataToFile(opportunities);
 
   res.status(200).json(updatedOpportunity);
 };
 
 export const deleteOpportunity = (req: Request, res: Response) => {
-  const { id } = req.params;
-  const index = opportunities.findIndex(op => op.id === id);
+  const opportunities = readDataFromFile();
+  const index = opportunities.findIndex(op => op.id === req.params.id);
 
   if (index === -1) {
-    return res.status(404).json({ error: "Opportunity not found" });
+    return res.status(404).json({ error: 'Opportunity not found' });
   }
 
   opportunities.splice(index, 1);
+  writeDataToFile(opportunities);
 
   res.status(204).send();
 };
