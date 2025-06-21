@@ -12,6 +12,7 @@ export const Header = () => (
           Home
         <NavLink to="/saved" style={{ marginLeft: '1rem' }}>Saved</NavLink>
         </NavLink>
+        <NavLink to="/favorites" className="nav-link">Favorites</NavLink>
         <NavLink to="/submit">Submit</NavLink>
         <NavLink to="/favorites">Favorites</NavLink>
         <NavLink to="/saved">Saved</NavLink>
