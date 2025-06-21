@@ -3,6 +3,7 @@
 // Create: src/controllers/opportunityController.ts
 import { Request, Response } from 'express';
 import { opportunities } from '../data/opportunities';
+import { VolunteerOpportunity } from '../types';
 
 export const getAllOpportunities = (req: Request, res: Response) => {
   const keyword = req.query.keyword?.toString().toLowerCase();
@@ -44,4 +45,24 @@ export const getOpportunityById = (req: Request, res: Response) => {
   }
 
   res.json(opportunity);
+};
+
+// Task 4: Implement POST Endpoint for Creating Opportunities
+
+export const createOpportunity = (req: Request, res: Response) => {
+  const { title, description, date, location, type, requiredSkills, status } = req.body;
+
+  const newOpportunity: VolunteerOpportunity = {
+    id: Date.now().toString(),
+    title,
+    description,
+    date,
+    location,
+    type,
+    requiredSkills,
+    status
+  };
+
+  opportunities.push(newOpportunity);
+  res.status(201).json(newOpportunity);
 };
