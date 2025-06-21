@@ -7,6 +7,8 @@ import { opportunities } from '../data/opportunities';
 export const getAllOpportunities = (req: Request, res: Response) => {
   const keyword = req.query.keyword?.toString().toLowerCase();
   const type = req.query.type?.toString().toLowerCase();
+  const sortBy = req.query.sortBy?.toString();
+  const order = req.query.order?.toString() || 'asc';
 
   let filtered = opportunities;
 
@@ -19,6 +21,14 @@ export const getAllOpportunities = (req: Request, res: Response) => {
 
   if (type) {
     filtered = filtered.filter(op => op.type.toLowerCase() === type);
+  }
+
+  if (sortBy === 'date' || sortBy === 'title') {
+    filtered = filtered.sort((a, b) => {
+      const aValue = a[sortBy].toLowerCase();
+      const bValue = b[sortBy].toLowerCase();
+      return order === 'desc' ? bValue.localeCompare(aValue) : aValue.localeCompare(bValue);
+    });
   }
 
   res.json(filtered);
