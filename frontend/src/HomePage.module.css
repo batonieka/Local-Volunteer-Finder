@@ -52,3 +52,8 @@
 .read-the-docs {
   color: #888;
 }
+
+:focus-visible {
+  outline: 2px solid #4f46e5; 
+  outline-offset: 2px;
+}

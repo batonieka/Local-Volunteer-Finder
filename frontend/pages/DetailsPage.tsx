@@ -10,6 +10,10 @@ const { data: opportunity, loading, error } = useFetch<VolunteerOpportunity>(
   `http://localhost:3000/opportunities/${id}`
 );
 
+useEffect(() => {
+  document.title = opportunity?.title || "Volunteer Opportunity";
+  document.querySelector("h1")?.focus();
+}, [opportunity]);
 
   if (loading) return <p className="text-center">Loading...</p>;
   if (error) return <p className="text-red-500 text-center">{error}</p>;
@@ -17,7 +21,7 @@ const { data: opportunity, loading, error } = useFetch<VolunteerOpportunity>(
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold">{opportunity.title}</h1>
+      <h1 tabIndex={-1} className="text-2xl font-bold">{opportunity.title}</h1>
       <p className="mt-2">{opportunity.description}</p>
       <div className="text-sm text-gray-600 mt-4">
         <p><strong>Date:</strong> {opportunity.date}</p>
