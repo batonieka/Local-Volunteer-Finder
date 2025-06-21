@@ -7,6 +7,6 @@
     "strict": true,
     "skipLibCheck": true,
     "moduleResolution": "node",          // Make sure this is included
-    "types": ["node", "express"]         // Add this line if missing
+    "types": ["jest", "node"]         // Add this line if missing
   }
 }
