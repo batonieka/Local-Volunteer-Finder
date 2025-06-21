@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 import { opportunities } from '../data/opportunities';
 
-// Task 1: Get all opportunities
 export const getAllOpportunities = (req: Request, res: Response) => {
   const keyword = req.query.keyword?.toString().toLowerCase();
   const type = req.query.type?.toString().toLowerCase();
+  const sortBy = req.query.sortBy?.toString();
+  const order = req.query.order?.toString() || 'asc';
 
   let filtered = opportunities;
 
@@ -19,10 +20,19 @@ export const getAllOpportunities = (req: Request, res: Response) => {
     filtered = filtered.filter(op => op.type.toLowerCase() === type);
   }
 
+  if (sortBy === 'date' || sortBy === 'title') {
+    filtered.sort((a, b) => {
+      const aVal = a[sortBy].toLowerCase();
+      const bVal = b[sortBy].toLowerCase();
+      return order === 'desc'
+        ? bVal.localeCompare(aVal)
+        : aVal.localeCompare(bVal);
+    });
+  }
+
   res.json(filtered);
 };
 
-// ✅ Task 2: Get opportunity by ID
 export const getOpportunityById = (req: Request, res: Response) => {
   const opportunity = opportunities.find(op => op.id === req.params.id);
 
