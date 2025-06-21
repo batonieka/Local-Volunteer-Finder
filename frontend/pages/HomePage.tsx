@@ -76,6 +76,11 @@ export const HomePage = () => {
 }, [opps, debouncedSearchTerm, state.category, sortOrder]);
 
 
+  useEffect(() => {
+  setCurrentPage(1);
+}, [state.searchTerm, state.category, sortOrder]);
+
+
   // Pagination with useMemo
   const paginated = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
