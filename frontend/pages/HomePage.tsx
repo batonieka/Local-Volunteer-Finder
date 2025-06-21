@@ -67,12 +67,12 @@ export const HomePage = () => {
       />
 
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <OpportunityCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : error ? (
+  <div className="grid gap-4 md:grid-cols-2">
+    {Array.from({ length: 6 }).map((_, i) => (
+      <OpportunityCardSkeleton key={i} />
+    ))}
+  </div>
+) : error ? (
         <p className="text-red-500 text-center">{error}</p>
       ) : filtered.length === 0 ? (
         <p className="text-center text-gray-500">No opportunities found.</p>
