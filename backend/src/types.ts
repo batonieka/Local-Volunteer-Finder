@@ -8,3 +8,4 @@ export interface VolunteerOpportunity {
   requiredSkills: string[]; // New
   status: 'open' | 'full' | 'completed'; // New
 }
+  
