@@ -83,7 +83,7 @@ export const FavoritesPage = () => {
     transition: "all 0.3s ease",
     position: "relative",
     width: "320px",
-    height: "420px",
+    height: "380px",
     margin: "0 auto",
     display: "flex",
     flexDirection: "column",

@@ -5,6 +5,8 @@ import { SavedPage } from "./pages/SavedPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { Layout } from "./src/components/Layout";
 import { FavoritesPage } from "./pages/FavoritesPage";
+import { SubmitPage } from "./pages/SubmitPage";
+
 
 
 function App() {
@@ -16,6 +18,7 @@ function App() {
         <Route path="/saved" element={<SavedPage />} /> 
         <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="*" element={<NotFoundPage />} />
+        <Route path="/submit" element={<SubmitPage />} />
       </Routes>
     </Layout>
   );
