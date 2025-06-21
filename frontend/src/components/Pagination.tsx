@@ -4,9 +4,17 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
+export const Pagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationProps) => {
   return (
-    <div className="flex justify-center mt-4 gap-4">
+    <nav
+      role="navigation"
+      aria-label="Pagination"
+      className="flex justify-center mt-4 gap-4"
+    >
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
@@ -14,7 +22,9 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
       >
         Previous
       </button>
-      <span className="px-4 py-2">{currentPage} / {totalPages}</span>
+      <span className="px-4 py-2">
+        Page {currentPage} of {totalPages}
+      </span>
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
@@ -22,6 +32,6 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }: Pagination
       >
         Next
       </button>
-    </div>
+    </nav>
   );
 };
