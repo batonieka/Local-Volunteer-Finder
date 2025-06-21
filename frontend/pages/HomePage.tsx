@@ -65,7 +65,7 @@ const filtered = useMemo(() => {
   }, [filtered, currentPage]);
 
   return (
-    <div className={styles.container}>
+<main role="main" className={styles.container}>
       <h1 className={styles.heading}>Volunteer Opportunities</h1>
 
       {/* FilterBar */}
@@ -88,13 +88,16 @@ const filtered = useMemo(() => {
 
       {/* Loading Skeleton */}
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <OpportunityCardSkeleton key={i} />
-          ))}
-        </div>
+  <div role="status" aria-live="polite">
+    <p className="sr-only">Loading volunteer opportunities...</p>
+    <div className="grid gap-4 md:grid-cols-2">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <OpportunityCardSkeleton key={i} />
+      ))}
+    </div>
+  </div>
       ) : error ? (
-        <p className="text-red-500 text-center">{error}</p>
+        <p role="alert" className="text-red-500 text-center">{error}</p>
       ) : filtered.length === 0 ? (
         <p className="text-center text-gray-500">No opportunities found.</p>
       ) : (
