@@ -31,3 +31,6 @@ app.get("/opportunities", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+ 
+import { createOpportunity, validateOpportunity } from './controllers/opportunityController';
+app.post("/opportunities", validateOpportunity, createOpportunity);

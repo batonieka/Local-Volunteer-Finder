@@ -66,3 +66,23 @@ export const createOpportunity = (req: Request, res: Response) => {
   opportunities.push(newOpportunity);
   res.status(201).json(newOpportunity);
 };
+
+// Task 5: Add Input Validation for the POST Endpoint
+
+export const validateOpportunity = (req: Request, res: Response, next: Function) => {
+  const { title, description, date, location, type, requiredSkills, status } = req.body;
+
+  if (
+    !title || typeof title !== 'string' ||
+    !description || typeof description !== 'string' ||
+    !date || typeof date !== 'string' ||
+    !location || typeof location !== 'string' ||
+    !type || typeof type !== 'string' ||
+    !Array.isArray(requiredSkills) ||
+    !status || typeof status !== 'string'
+  ) {
+    return res.status(400).json({ error: 'Missing or invalid fields' });
+  }
+
+  next();
+};
