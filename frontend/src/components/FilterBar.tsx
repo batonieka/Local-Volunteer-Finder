@@ -17,14 +17,27 @@ export const FilterBar = ({
   return (
     <div className="flex flex-wrap gap-4 items-center justify-between mb-6">
       {/* Search Input */}
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Search..."
-        aria-label="Search opportunities"
-        className="border px-2 py-1 rounded"
-      />
+      <div className="relative">
+  <input
+    type="text"
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    placeholder="Search..."
+    aria-label="Search opportunities"
+    className="border px-2 py-1 rounded"
+  />
+  {searchTerm && (
+    <button
+      type="button"
+      onClick={() => setSearchTerm("")}
+      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"
+      aria-label="Clear search"
+    >
+      ×
+    </button>
+  )}
+</div>
+
 
       {/* Category Dropdown */}
       <select
