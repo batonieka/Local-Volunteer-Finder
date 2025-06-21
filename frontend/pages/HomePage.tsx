@@ -7,6 +7,8 @@ import { OpportunityCardSkeleton } from "../src/components/OpportunityCardSkelet
 import { Pagination } from "../src/components/Pagination";
 import { useFetch } from "../src/hooks/useFetch";
 import styles from "../src/HomePage.module.css";
+import { fetchOpportunities } from "../src/services/api";
+;
 
 // Reducer Setup
 type FilterState = { searchTerm: string; category: string };
@@ -39,22 +41,21 @@ export const HomePage = () => {
   const debouncedSearchTerm = useDebounce(state.searchTerm, 300);
 
   // Fetch opportunities
-  const { data: opps = [], loading, error } = useFetch<VolunteerOpportunity[]>(
-    "http://localhost:3000/opportunities"
-  );
+  const { data: opps = [], loading, error } = useFetch(fetchOpportunities);
+
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
   // Filtering with useMemo
-const filtered = useMemo(() => {
-  return (opps ?? []).filter(
-    (opp) =>
-      opp.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) &&
-      (state.category ? opp.type === state.category : true)
-  );
-}, [opps, debouncedSearchTerm, state.category]);
+  const filtered = useMemo(() => {
+    return (opps ?? []).filter(
+      (opp: { title: string; type: string; }) =>
+        opp.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) &&
+        (state.category ? opp.type === state.category : true)
+    );
+  }, [opps, debouncedSearchTerm, state.category]);
 
 
   // Pagination with useMemo
@@ -64,7 +65,7 @@ const filtered = useMemo(() => {
   }, [filtered, currentPage]);
 
   return (
-<main role="main" className={styles.container}>
+    <main role="main" className={styles.container}>
       <h1 className={styles.heading}>Volunteer Opportunities</h1>
 
       {/* FilterBar */}
@@ -77,24 +78,24 @@ const filtered = useMemo(() => {
 
       <div className="mb-6 text-center">
         <button
-           onClick={() => dispatch({ type: "RESET_FILTERS" })}
-           className="border border-gray-400 px-4 py-2 rounded hover:bg-gray-100 transition"
-          >
-        Reset Filters
+          onClick={() => dispatch({ type: "RESET_FILTERS" })}
+          className="border border-gray-400 px-4 py-2 rounded hover:bg-gray-100 transition"
+        >
+          Reset Filters
         </button>
-        </div>
+      </div>
 
 
       {/* Loading Skeleton */}
       {loading ? (
-  <div role="status" aria-live="polite">
-    <p className="sr-only">Loading volunteer opportunities...</p>
-    <div className="grid gap-4 md:grid-cols-2">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <OpportunityCardSkeleton key={i} />
-      ))}
-    </div>
-  </div>
+        <div role="status" aria-live="polite">
+          <p className="sr-only">Loading volunteer opportunities...</p>
+          <div className="grid gap-4 md:grid-cols-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <OpportunityCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
       ) : error ? (
         <p role="alert" className="text-red-500 text-center">{error}</p>
       ) : filtered.length === 0 ? (
@@ -102,14 +103,14 @@ const filtered = useMemo(() => {
       ) : (
         <>
           <ul className="grid gap-4 md:grid-cols-2">
-            {paginated.map(opp => (
-          <li key={opp.id}>
-            <OpportunityCard opportunity={opp} />
-          </li>
-           ))}
+            {paginated.map((opp: VolunteerOpportunity) => (
+              <li key={opp.id}>
+                <OpportunityCard opportunity={opp} />
+              </li>
+            ))}
           </ul>
 
-          
+
 
           {/* Pagination */}
           <Pagination

@@ -1,21 +1,23 @@
 import { useEffect, useState } from "react";
 
-export const useFetch = <T>(url: string) => {
+export function useFetch<T>(fetchFn: () => Promise<T>) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
     setLoading(true);
-    fetch(url)
-      .then(res => {
-        if (!res.ok) throw new Error("Fetch error");
-        return res.json();
-      })
-      .then(setData)
-      .catch(() => setError("Could not fetch data"))
-      .finally(() => setLoading(false));
-  }, [url]);
+
+    fetchFn()
+      .then((res) => mounted && setData(res))
+      .catch(() => mounted && setError("Failed to fetch data"))
+      .finally(() => mounted && setLoading(false));
+
+    return () => {
+      mounted = false;
+    };
+  }, [fetchFn]);
 
   return { data, loading, error };
-};
+}
