@@ -102,11 +102,15 @@ const filtered = useMemo(() => {
         <p className="text-center text-gray-500">No opportunities found.</p>
       ) : (
         <>
-          <div className="grid gap-4 md:grid-cols-2">
-            {paginated.map((opp) => (
-              <OpportunityCard key={opp.id} opportunity={opp} />
-            ))}
-          </div>
+          <ul className="grid gap-4 md:grid-cols-2">
+            {paginated.map(opp => (
+          <li key={opp.id}>
+            <OpportunityCard opportunity={opp} />
+          </li>
+           ))}
+          </ul>
+
+          
 
           {/* Pagination */}
           <Pagination
