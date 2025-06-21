@@ -19,6 +19,21 @@ export const DetailsPage = () => {
         <button className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">
           Sign Up for this Opportunity
         </button>
+        <button
+  onClick={() => {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: "Check out this opportunity", url });
+    } else {
+      navigator.clipboard.writeText(url);
+      alert("Link copied to clipboard!");
+    }
+  }}
+  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition mt-4"
+>
+  Share
+</button>
+
       </div>
       <div className="space-y-4 text-sm text-gray-600">
         <p>
