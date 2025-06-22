@@ -10,6 +10,7 @@ import {
   deleteOpportunity
 } from './controllers/opportunityController';
 import { errorHandler } from './middleware/errorHandler';
+import { apiLimiter } from './middleware/rateLimiter'; // ✅ Import rate limiter
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +19,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(apiLimiter); // ✅ Apply global rate limiting
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -44,6 +46,7 @@ app.use('*', (req, res) => {
 // Error handling middleware (must be last)
 app.use(errorHandler);
 
+// Start server
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
