@@ -14,6 +14,7 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
     const status = req.query.status?.toString() as VolunteerOpportunity['status'];
     const sortBy = req.query.sortBy?.toString();
     const order = req.query.order?.toString() || 'asc';
+    const showExpired = req.query.showExpired?.toString() === 'true';
 
     const startDateStr = req.query.startDate?.toString();
     const endDateStr = req.query.endDate?.toString();
@@ -22,6 +23,8 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
 
     const page = parseInt(req.query.page?.toString() || '1');
     const limit = parseInt(req.query.limit?.toString() || '10');
+
+    const now = new Date();
 
     let filtered = opportunities;
 
@@ -49,6 +52,10 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
         if (endDate && opportunityDate > endDate) return false;
         return true;
       });
+    }
+
+    if (!showExpired) {
+      filtered = filtered.filter(op => new Date(op.date) >= now);
     }
 
     if (sortBy === 'date') {
@@ -83,6 +90,7 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
     next(error);
   }
 };
+
 
 // GET /opportunities/:id
 export const getOpportunityById = async (req: Request, res: Response, next: NextFunction) => {
