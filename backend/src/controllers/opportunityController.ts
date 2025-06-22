@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { VolunteerOpportunity } from '../types';
 import { readDataFromFile, writeDataToFile } from '../utils/fileUtils';
 import { validateOpportunityInput } from '../utils/validateOpportunity';
+import { opportunitySchema } from '../validation/opportunitySchema';
 
 // GET /opportunities
 export const getAllOpportunities = async (req: Request, res: Response, next: NextFunction) => {
@@ -87,23 +88,21 @@ export const getOpportunityById = async (req: Request, res: Response, next: Next
 // POST /opportunities
 export const createOpportunity = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const data = req.body;
-    const errors = validateOpportunityInput(data);
+    const result = opportunitySchema.safeParse(req.body);
 
-    if (errors.length > 0) {
+    if (!result.success) {
+      const errors = result.error.errors.map(e => e.message);
       return res.status(400).json({ errors });
     }
+
+    const data = result.data;
 
     const opportunities = await readDataFromFile();
     const newOpportunity: VolunteerOpportunity = {
       id: Date.now().toString(),
-      title: data.title.trim(),
-      description: data.description.trim(),
-      date: data.date.trim(),
-      location: data.location.trim(),
-      type: data.type.trim(),
+      ...data,
       requiredSkills: data.requiredSkills || [],
-      status: data.status || 'open'
+      status: data.status || 'open',
     };
 
     opportunities.push(newOpportunity);
@@ -115,44 +114,52 @@ export const createOpportunity = async (req: Request, res: Response, next: NextF
   }
 };
 
+
 // PUT /opportunities/:id
 export const updateOpportunity = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const opportunities = await readDataFromFile();
     const index = opportunities.findIndex(op => op.id === req.params.id);
+
     if (index === -1) {
       return res.status(404).json({ error: 'Opportunity not found' });
     }
 
-    const updatedData = {
+    const merged = {
       ...opportunities[index],
-      ...req.body
+      ...req.body,
     };
 
-    const errors = validateOpportunityInput(updatedData);
-    if (errors.length > 0) {
+    const result = opportunitySchema.safeParse(merged);
+
+    if (!result.success) {
+      const errors = result.error.errors.map(e => e.message);
       return res.status(400).json({ errors });
     }
 
+    const validatedData = result.data;
+
     const updatedOpportunity: VolunteerOpportunity = {
       id: req.params.id,
-      title: updatedData.title.trim(),
-      description: updatedData.description.trim(),
-      date: updatedData.date.trim(),
-      location: updatedData.location.trim(),
-      type: updatedData.type.trim(),
-      requiredSkills: updatedData.requiredSkills,
-      status: updatedData.status
+      title: validatedData.title,
+      description: validatedData.description,
+      date: validatedData.date,
+      location: validatedData.location,
+      type: validatedData.type,
+      status: validatedData.status ?? "open",
+      requiredSkills: validatedData.requiredSkills ?? [],
     };
 
     opportunities[index] = updatedOpportunity;
     await writeDataToFile(opportunities);
-
     res.json(updatedOpportunity);
   } catch (error) {
     next(error);
   }
 };
+
+
+
 
 // DELETE /opportunities/:id
 export const deleteOpportunity = async (req: Request, res: Response, next: NextFunction) => {
