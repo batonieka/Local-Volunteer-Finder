@@ -5,6 +5,7 @@ export interface VolunteerOpportunity {
   date: string;
   location: string;
   type: string;
-  requiredSkills: string[];
-  status: "open" | "full" | "completed";
+  status?: 'open' | 'full' | 'completed';
+  requiredSkills?: string[];
+  favoritedBy?: string[]; // user IDs (e.g. 'user123')
 }

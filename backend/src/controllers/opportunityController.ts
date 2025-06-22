@@ -29,13 +29,14 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
     let filtered = opportunities;
 
     if (keyword) {
-      filtered = filtered.filter(op =>
-        op.title.toLowerCase().includes(keyword) ||
-        op.description.toLowerCase().includes(keyword) ||
-        op.location.toLowerCase().includes(keyword) ||
-        op.requiredSkills.some(skill => skill.toLowerCase().includes(keyword))
-      );
-    }
+  filtered = filtered.filter(op =>
+    op.title.toLowerCase().includes(keyword) ||
+    op.description.toLowerCase().includes(keyword) ||
+    op.location.toLowerCase().includes(keyword) ||
+    (op.requiredSkills ?? []).some(skill => skill.toLowerCase().includes(keyword))
+  );
+}
+
 
     if (type) {
       filtered = filtered.filter(op => op.type.toLowerCase() === type);

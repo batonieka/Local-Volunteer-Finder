@@ -12,6 +12,8 @@ import {
 } from './controllers/opportunityController';
 import { errorHandler } from './middleware/errorHandler';
 import { getLimiter, writeLimiter } from './middleware/rateLimiter';
+import { toggleFavoriteOpportunity, getFavoritesByUser } from './controllers/favoriteController';
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,3 +53,8 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
+
+
+app.get('/favorites/:userId', getFavoritesByUser);
+app.post('/opportunities/:id/favorite/:userId', toggleFavoriteOpportunity);
+
