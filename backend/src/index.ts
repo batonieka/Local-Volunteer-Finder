@@ -9,7 +9,6 @@ import {
   updateOpportunity,
   deleteOpportunity
 } from './controllers/opportunityController';
-// inside src/index.ts
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
