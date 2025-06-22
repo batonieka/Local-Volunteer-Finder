@@ -1,69 +1,89 @@
-import { validateOpportunityInput } from '../utils/validateOpportunity';
-import { VolunteerOpportunity } from '../types';
+import { opportunitySchema } from "../validation/opportunitySchema";
 
-describe('validateOpportunityInput', () => {
-  it('should return no errors for valid input', () => {
-    const validInput: Partial<VolunteerOpportunity> = {
-      title: "Test",
-      description: "Some description",
-      date: "2025-07-01",
-      location: "Tbilisi",
-      type: "Education",
-      requiredSkills: ["Communication"],
-      status: "open" // type-safe literal
+describe("Zod Opportunity Schema Validation", () => {
+  it("✅ should pass for valid input", () => {
+    const validInput = {
+      title: "Park Cleanup",
+      description: "Clean the park",
+      date: "2025-06-10",
+      location: "Central Park",
+      type: "Environmental",
+      requiredSkills: ["Teamwork", "Physical stamina"],
+      status: "open"
     };
 
-    const errors = validateOpportunityInput(validInput);
-    expect(errors.length).toBe(0);
+    const result = opportunitySchema.safeParse(validInput);
+    expect(result.success).toBe(true);
   });
 
-  it('should return errors for missing required fields', () => {
-    const input: Partial<VolunteerOpportunity> = {
-      title: "",
-      description: "",
-      date: "",
-      location: "",
-      type: ""
+  it("❌ should fail if required fields are missing", () => {
+    const invalidInput = {
+      description: "Missing title",
+      date: "2025-06-10",
+      location: "Central Park",
+      type: "Environmental"
     };
 
-    const errors = validateOpportunityInput(input);
-    expect(errors.length).toBeGreaterThan(0);
-    expect(errors).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining("Title"),
-        expect.stringContaining("Description"),
-        expect.stringContaining("Date"),
-        expect.stringContaining("Location"),
-        expect.stringContaining("Type")
-      ])
-    );
+    const result = opportunitySchema.safeParse(invalidInput);
+    expect(result.success).toBe(false);
+
+    if (!result.success) {
+      const errorFields = result.error.issues.map(issue => issue.path[0]);
+      expect(errorFields).toContain("title");
+    }
   });
 
-  it('should return an error for invalid status', () => {
-    const input: Partial<VolunteerOpportunity> = {
-      title: "Test",
-      description: "Desc",
-      date: "2025-07-01",
-      location: "Tbilisi",
-      type: "Community",
-      status: "invalid-status" as any // intentionally wrong
+  it("❌ should fail if `requiredSkills` has non-string values", () => {
+    const input = {
+      title: "Beach Cleanup",
+      description: "Cleaning beach",
+      date: "2025-06-11",
+      location: "Seaside",
+      type: "Environmental",
+      requiredSkills: ["Teamwork", 42] // <- Invalid
     };
 
-    const errors = validateOpportunityInput(input);
-    expect(errors).toContain("Invalid status. Must be 'open', 'full', or 'completed'.");
+    const result = opportunitySchema.safeParse(input);
+    expect(result.success).toBe(false);
+
+    if (!result.success) {
+      expect(result.error.issues[0].path).toContain("requiredSkills");
+    }
   });
 
-  it('should return an error if requiredSkills is not an array of strings', () => {
-    const input: Partial<VolunteerOpportunity> = {
-      title: "Test",
-      description: "Desc",
+  it("❌ should fail if `status` is not in the allowed enum", () => {
+    const input = {
+      title: "Tree Planting",
+      description: "Planting trees",
       date: "2025-07-01",
-      location: "Tbilisi",
-      type: "Community",
-      requiredSkills: ["Teamwork", 123] as any // mixed array
+      location: "City Park",
+      type: "Environmental",
+      status: "pending" as any // invalid
     };
 
-    const errors = validateOpportunityInput(input);
-    expect(errors).toContain("requiredSkills must be an array of strings.");
+    const result = opportunitySchema.safeParse(input);
+    expect(result.success).toBe(false);
+
+    if (!result.success) {
+      expect(result.error.issues[0].path[0]).toBe("status");
+    }
+  });
+
+  it("✅ should accept optional fields when omitted", () => {
+    const input = {
+      title: "Event Photography",
+      description: "Take photos at community events",
+      date: "2025-07-10",
+      location: "Town Hall",
+      type: "Creative"
+    };
+
+    const result = opportunitySchema.safeParse(input);
+    expect(result.success).toBe(true);
+
+    if (result.success) {
+      expect(result.data.requiredSkills).toBeUndefined();
+      expect(result.data.status).toBeUndefined();
+    }
   });
 });
