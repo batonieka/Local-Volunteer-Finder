@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { VolunteerOpportunity } from '../types';
 import { readDataFromFile, writeDataToFile } from '../utils/fileUtils';
-import { validateOpportunityInput } from '../utils/validateOpportunity';
 import { opportunitySchema } from '../validation/opportunitySchema';
+import { logger } from '../utils/logger'; //  Winston logger
 
 // GET /opportunities
 export const getAllOpportunities = async (req: Request, res: Response, next: NextFunction) => {
@@ -65,6 +65,8 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
     const endIndex = startIndex + limit;
     const paginatedResults = filtered.slice(startIndex, endIndex);
 
+    logger.info(`Fetched ${paginatedResults.length} opportunities (Page ${page}/${Math.ceil(filtered.length / limit)})`);
+
     res.json({
       data: paginatedResults,
       pagination: {
@@ -77,21 +79,26 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
       },
     });
   } catch (error) {
+    logger.error(`Failed to fetch opportunities: ${(error as Error).message}`);
     next(error);
   }
 };
-
 
 // GET /opportunities/:id
 export const getOpportunityById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const opportunities = await readDataFromFile();
     const opportunity = opportunities.find(op => op.id === req.params.id);
+
     if (!opportunity) {
+      logger.warn(`Opportunity not found: ${req.params.id}`);
       return res.status(404).json({ error: 'Opportunity not found' });
     }
+
+    logger.info(`Fetched opportunity ID: ${req.params.id}`);
     res.json(opportunity);
   } catch (error) {
+    logger.error(`Error fetching opportunity by ID: ${(error as Error).message}`);
     next(error);
   }
 };
@@ -103,12 +110,13 @@ export const createOpportunity = async (req: Request, res: Response, next: NextF
 
     if (!result.success) {
       const errors = result.error.errors.map(e => e.message);
+      logger.warn(`Validation failed for new opportunity: ${errors.join(', ')}`);
       return res.status(400).json({ errors });
     }
 
     const data = result.data;
-
     const opportunities = await readDataFromFile();
+
     const newOpportunity: VolunteerOpportunity = {
       id: Date.now().toString(),
       ...data,
@@ -119,12 +127,13 @@ export const createOpportunity = async (req: Request, res: Response, next: NextF
     opportunities.push(newOpportunity);
     await writeDataToFile(opportunities);
 
+    logger.info(`Created new opportunity: ${newOpportunity.id}`);
     res.status(201).json(newOpportunity);
   } catch (error) {
+    logger.error(`Failed to create opportunity: ${(error as Error).message}`);
     next(error);
   }
 };
-
 
 // PUT /opportunities/:id
 export const updateOpportunity = async (req: Request, res: Response, next: NextFunction) => {
@@ -133,6 +142,7 @@ export const updateOpportunity = async (req: Request, res: Response, next: NextF
     const index = opportunities.findIndex(op => op.id === req.params.id);
 
     if (index === -1) {
+      logger.warn(`Update failed - opportunity not found: ${req.params.id}`);
       return res.status(404).json({ error: 'Opportunity not found' });
     }
 
@@ -142,14 +152,13 @@ export const updateOpportunity = async (req: Request, res: Response, next: NextF
     };
 
     const result = opportunitySchema.safeParse(merged);
-
     if (!result.success) {
       const errors = result.error.errors.map(e => e.message);
+      logger.warn(`Validation failed for update: ${errors.join(', ')}`);
       return res.status(400).json({ errors });
     }
 
     const validatedData = result.data;
-
     const updatedOpportunity: VolunteerOpportunity = {
       id: req.params.id,
       title: validatedData.title,
@@ -163,29 +172,33 @@ export const updateOpportunity = async (req: Request, res: Response, next: NextF
 
     opportunities[index] = updatedOpportunity;
     await writeDataToFile(opportunities);
+
+    logger.info(`Updated opportunity ID: ${req.params.id}`);
     res.json(updatedOpportunity);
   } catch (error) {
+    logger.error(`Error updating opportunity: ${(error as Error).message}`);
     next(error);
   }
 };
-
-
-
 
 // DELETE /opportunities/:id
 export const deleteOpportunity = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const opportunities = await readDataFromFile();
     const index = opportunities.findIndex(op => op.id === req.params.id);
+
     if (index === -1) {
+      logger.warn(`Delete failed - opportunity not found: ${req.params.id}`);
       return res.status(404).json({ error: 'Opportunity not found' });
     }
 
     opportunities.splice(index, 1);
     await writeDataToFile(opportunities);
 
+    logger.info(`Deleted opportunity ID: ${req.params.id}`);
     res.status(204).send();
   } catch (error) {
+    logger.error(`Error deleting opportunity: ${(error as Error).message}`);
     next(error);
   }
 };
