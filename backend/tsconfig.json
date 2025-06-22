@@ -9,7 +9,7 @@
     "strict": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
-    "types": ["jest", "node"]
+    "types": ["jest", "node"] // Ensure jest is included here
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]

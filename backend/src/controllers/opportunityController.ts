@@ -2,23 +2,26 @@ import { Request, Response, NextFunction } from 'express';
 import { VolunteerOpportunity } from '../types';
 import { readDataFromFile, writeDataToFile } from '../utils/fileUtils';
 
-export const getAllOpportunities = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllOpportunities = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const opportunities = await readDataFromFile();
 
     const keyword = req.query.keyword?.toString().toLowerCase();
     const type = req.query.type?.toString().toLowerCase();
-    const status = req.query.status?.toString() as VolunteerOpportunity["status"];
+    const status = req.query.status?.toString() as VolunteerOpportunity['status'];
     const sortBy = req.query.sortBy?.toString();
     const order = req.query.order?.toString() || 'asc';
-    
-    // Pagination parameters
+
     const page = parseInt(req.query.page?.toString() || '1');
     const limit = parseInt(req.query.limit?.toString() || '10');
 
     let filtered = opportunities;
 
-    // Filtering logic
+    // Filtering
     if (keyword) {
       filtered = filtered.filter(op =>
         op.title.toLowerCase().includes(keyword) ||
@@ -36,7 +39,7 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
       filtered = filtered.filter(op => op.status === status);
     }
 
-    // Sorting logic
+    // Sorting
     if (sortBy === 'date') {
       filtered.sort((a, b) => {
         const dateA = new Date(a.date);
@@ -45,13 +48,13 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
       });
     } else if (sortBy === 'title') {
       filtered.sort((a, b) => {
-        const titleA = a.title.toLowerCase();
-        const titleB = b.title.toLowerCase();
-        return order === 'desc' ? titleB.localeCompare(titleA) : titleA.localeCompare(titleB);
+        return order === 'desc'
+          ? b.title.toLowerCase().localeCompare(a.title.toLowerCase())
+          : a.title.toLowerCase().localeCompare(b.title.toLowerCase());
       });
     }
 
-    // Pagination logic
+    // Pagination
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     const paginatedResults = filtered.slice(startIndex, endIndex);
@@ -64,28 +67,39 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
         total: filtered.length,
         totalPages: Math.ceil(filtered.length / limit),
         hasNext: endIndex < filtered.length,
-        hasPrev: page > 1
-      }
+        hasPrev: page > 1,
+      },
     });
   } catch (error) {
     next(error);
   }
 };
 
-export const getOpportunityById = async (req: Request, res: Response, next: NextFunction) => {
+export const getOpportunityById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const opportunities = await readDataFromFile();
     const opportunity = opportunities.find(op => op.id === req.params.id);
+
     if (!opportunity) {
-      return res.status(404).json({ error: 'Opportunity not found' });
+      res.status(404).json({ error: 'Opportunity not found' });
+      return;
     }
+
     res.json(opportunity);
   } catch (error) {
     next(error);
   }
 };
 
-export const createOpportunity = async (req: Request, res: Response, next: NextFunction) => {
+export const createOpportunity = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { title, description, date, location, type, requiredSkills, status } = req.body;
 
@@ -97,15 +111,20 @@ export const createOpportunity = async (req: Request, res: Response, next: NextF
       typeof location !== 'string' || !location.trim() ||
       typeof type !== 'string' || !type.trim()
     ) {
-      return res.status(400).json({ error: "Missing or invalid required fields: title, description, date, location, type are required." });
+      res.status(400).json({
+        error: "Missing or invalid required fields: title, description, date, location, and type are required."
+      });
+      return;
     }
 
     if (requiredSkills && (!Array.isArray(requiredSkills) || !requiredSkills.every(skill => typeof skill === 'string'))) {
-      return res.status(400).json({ error: "requiredSkills must be an array of strings." });
+      res.status(400).json({ error: "requiredSkills must be an array of strings." });
+      return;
     }
 
     if (status && !['open', 'full', 'completed'].includes(status)) {
-      return res.status(400).json({ error: "Invalid status. Must be 'open', 'full', or 'completed'." });
+      res.status(400).json({ error: "Invalid status. Must be 'open', 'full', or 'completed'." });
+      return;
     }
 
     const opportunities = await readDataFromFile();
@@ -130,37 +149,55 @@ export const createOpportunity = async (req: Request, res: Response, next: NextF
   }
 };
 
-export const updateOpportunity = async (req: Request, res: Response, next: NextFunction) => {
+export const updateOpportunity = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const opportunities = await readDataFromFile();
     const index = opportunities.findIndex(op => op.id === req.params.id);
+
     if (index === -1) {
-      return res.status(404).json({ error: 'Opportunity not found' });
+      res.status(404).json({ error: 'Opportunity not found' });
+      return;
     }
 
     const { title, description, date, location, type, requiredSkills, status } = req.body;
 
-    // Validation for provided fields
     if (title !== undefined && (typeof title !== 'string' || !title.trim())) {
-      return res.status(400).json({ error: "Title must be a non-empty string." });
+      res.status(400).json({ error: "Title must be a non-empty string." });
+      return;
     }
+
     if (description !== undefined && (typeof description !== 'string' || !description.trim())) {
-      return res.status(400).json({ error: "Description must be a non-empty string." });
+      res.status(400).json({ error: "Description must be a non-empty string." });
+      return;
     }
+
     if (date !== undefined && (typeof date !== 'string' || !date.trim())) {
-      return res.status(400).json({ error: "Date must be a non-empty string." });
+      res.status(400).json({ error: "Date must be a non-empty string." });
+      return;
     }
+
     if (location !== undefined && (typeof location !== 'string' || !location.trim())) {
-      return res.status(400).json({ error: "Location must be a non-empty string." });
+      res.status(400).json({ error: "Location must be a non-empty string." });
+      return;
     }
+
     if (type !== undefined && (typeof type !== 'string' || !type.trim())) {
-      return res.status(400).json({ error: "Type must be a non-empty string." });
+      res.status(400).json({ error: "Type must be a non-empty string." });
+      return;
     }
+
     if (requiredSkills !== undefined && (!Array.isArray(requiredSkills) || !requiredSkills.every(skill => typeof skill === 'string'))) {
-      return res.status(400).json({ error: "requiredSkills must be an array of strings." });
+      res.status(400).json({ error: "requiredSkills must be an array of strings." });
+      return;
     }
+
     if (status !== undefined && !['open', 'full', 'completed'].includes(status)) {
-      return res.status(400).json({ error: "Invalid status. Must be 'open', 'full', or 'completed'." });
+      res.status(400).json({ error: "Invalid status. Must be 'open', 'full', or 'completed'." });
+      return;
     }
 
     const updated: VolunteerOpportunity = {
@@ -183,12 +220,18 @@ export const updateOpportunity = async (req: Request, res: Response, next: NextF
   }
 };
 
-export const deleteOpportunity = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteOpportunity = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const opportunities = await readDataFromFile();
     const index = opportunities.findIndex(op => op.id === req.params.id);
+
     if (index === -1) {
-      return res.status(404).json({ error: 'Opportunity not found' });
+      res.status(404).json({ error: 'Opportunity not found' });
+      return;
     }
 
     opportunities.splice(index, 1);

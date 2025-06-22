@@ -1,3 +1,4 @@
+// Local-Volunteer-Finder/backend/middleware/errorHandler.ts
 import { Request, Response, NextFunction } from 'express';
 
 export const errorHandler = (
@@ -14,9 +15,7 @@ export const errorHandler = (
     timestamp: new Date().toISOString()
   });
 
-  // Don't leak error details in production
   const isDevelopment = process.env.NODE_ENV === 'development';
-  
   res.status(500).json({
     error: 'Internal server error',
     ...(isDevelopment && { 
