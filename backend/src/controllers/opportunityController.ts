@@ -13,13 +13,14 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
     const type = req.query.type?.toString().toLowerCase();
     const status = req.query.status as VolunteerOpportunity["status"];
     const sortBy = req.query.sortBy?.toString();
-    const order = req.query.order?.toString() || 'asc';
+    const order = req.query.order?.toString() === "desc" ? "desc" : "asc";
 
-    const page = parseInt(req.query.page?.toString() || '1');
-    const limit = parseInt(req.query.limit?.toString() || '10');
+    const page = parseInt(req.query.page?.toString() || "1");
+    const limit = parseInt(req.query.limit?.toString() || "10");
 
     let filtered = opportunities;
 
+    // 🔍 Filtering
     if (keyword) {
       filtered = filtered.filter(op =>
         op.title.toLowerCase().includes(keyword) ||
@@ -37,20 +38,22 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
       filtered = filtered.filter(op => op.status === status);
     }
 
-    if (sortBy === 'date') {
+    // 📊 Sorting
+    if (sortBy === "date") {
       filtered.sort((a, b) => {
         const dateA = new Date(a.date).getTime();
         const dateB = new Date(b.date).getTime();
-        return order === 'desc' ? dateB - dateA : dateA - dateB;
+        return order === "desc" ? dateB - dateA : dateA - dateB;
       });
-    } else if (sortBy === 'title') {
+    } else if (sortBy === "title") {
       filtered.sort((a, b) => {
         const titleA = a.title.toLowerCase();
         const titleB = b.title.toLowerCase();
-        return order === 'desc' ? titleB.localeCompare(titleA) : titleA.localeCompare(titleB);
+        return order === "desc" ? titleB.localeCompare(titleA) : titleA.localeCompare(titleB);
       });
     }
 
+    // 📄 Pagination
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     const paginatedResults = filtered.slice(startIndex, endIndex);
@@ -70,6 +73,7 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
     next(error);
   }
 };
+
 
 // GET /opportunities/:id
 export const getOpportunityById = async (req: Request, res: Response, next: NextFunction) => {
