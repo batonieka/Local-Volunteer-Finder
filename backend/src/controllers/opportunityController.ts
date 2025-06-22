@@ -11,16 +11,20 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
 
     const keyword = req.query.keyword?.toString().toLowerCase();
     const type = req.query.type?.toString().toLowerCase();
-    const status = req.query.status as VolunteerOpportunity["status"];
+    const status = req.query.status?.toString() as VolunteerOpportunity['status'];
     const sortBy = req.query.sortBy?.toString();
-    const order = req.query.order?.toString() === "desc" ? "desc" : "asc";
+    const order = req.query.order?.toString() || 'asc';
 
-    const page = parseInt(req.query.page?.toString() || "1");
-    const limit = parseInt(req.query.limit?.toString() || "10");
+    const startDateStr = req.query.startDate?.toString();
+    const endDateStr = req.query.endDate?.toString();
+    const startDate = startDateStr ? new Date(startDateStr) : null;
+    const endDate = endDateStr ? new Date(endDateStr) : null;
+
+    const page = parseInt(req.query.page?.toString() || '1');
+    const limit = parseInt(req.query.limit?.toString() || '10');
 
     let filtered = opportunities;
 
-    // 🔍 Filtering
     if (keyword) {
       filtered = filtered.filter(op =>
         op.title.toLowerCase().includes(keyword) ||
@@ -38,22 +42,25 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
       filtered = filtered.filter(op => op.status === status);
     }
 
-    // 📊 Sorting
-    if (sortBy === "date") {
-      filtered.sort((a, b) => {
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
-        return order === "desc" ? dateB - dateA : dateA - dateB;
-      });
-    } else if (sortBy === "title") {
-      filtered.sort((a, b) => {
-        const titleA = a.title.toLowerCase();
-        const titleB = b.title.toLowerCase();
-        return order === "desc" ? titleB.localeCompare(titleA) : titleA.localeCompare(titleB);
+    if (startDate || endDate) {
+      filtered = filtered.filter(op => {
+        const opportunityDate = new Date(op.date);
+        if (startDate && opportunityDate < startDate) return false;
+        if (endDate && opportunityDate > endDate) return false;
+        return true;
       });
     }
 
-    // 📄 Pagination
+    if (sortBy === 'date') {
+      filtered.sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return order === 'desc' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
+      });
+    } else if (sortBy === 'title') {
+      filtered.sort((a, b) => a.title.localeCompare(b.title) * (order === 'desc' ? -1 : 1));
+    }
+
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     const paginatedResults = filtered.slice(startIndex, endIndex);
@@ -66,8 +73,8 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
         total: filtered.length,
         totalPages: Math.ceil(filtered.length / limit),
         hasNext: endIndex < filtered.length,
-        hasPrev: page > 1
-      }
+        hasPrev: page > 1,
+      },
     });
   } catch (error) {
     next(error);
