@@ -1,244 +1,137 @@
-import { Request, Response, NextFunction } from 'express';
-import { VolunteerOpportunity } from '../types';
+// src/tests/opportunityController.test.ts
+import request from 'supertest';
+import express from 'express';
+import {
+  getAllOpportunities,
+  getOpportunityById,
+  createOpportunity,
+  updateOpportunity,
+  deleteOpportunity
+} from '../controllers/opportunityController';
 import { readDataFromFile, writeDataToFile } from '../utils/fileUtils';
 
-export const getAllOpportunities = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const opportunities = await readDataFromFile();
+const app = express();
+app.use(express.json());
 
-    const keyword = req.query.keyword?.toString().toLowerCase();
-    const type = req.query.type?.toString().toLowerCase();
-    const status = req.query.status?.toString() as VolunteerOpportunity['status'];
-    const sortBy = req.query.sortBy?.toString();
-    const order = req.query.order?.toString() || 'asc';
+app.get('/opportunities', getAllOpportunities);
+app.get('/opportunities/:id', getOpportunityById);
+app.post('/opportunities', createOpportunity);
+app.put('/opportunities/:id', updateOpportunity);
+app.delete('/opportunities/:id', deleteOpportunity);
 
-    const page = parseInt(req.query.page?.toString() || '1');
-    const limit = parseInt(req.query.limit?.toString() || '10');
+describe('Opportunity Controller – Advanced Coverage', () => {
+  let id: string;
 
-    let filtered = opportunities;
+  beforeEach(async () => {
+    await writeDataToFile([]); // reset before each test
+  });
 
-    // Filtering
-    if (keyword) {
-      filtered = filtered.filter(op =>
-        op.title.toLowerCase().includes(keyword) ||
-        op.description.toLowerCase().includes(keyword) ||
-        op.location.toLowerCase().includes(keyword) ||
-        op.requiredSkills.some(skill => skill.toLowerCase().includes(keyword))
-      );
-    }
-
-    if (type) {
-      filtered = filtered.filter(op => op.type.toLowerCase() === type);
-    }
-
-    if (status) {
-      filtered = filtered.filter(op => op.status === status);
-    }
-
-    // Sorting
-    if (sortBy === 'date') {
-      filtered.sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
-        return order === 'desc' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
-      });
-    } else if (sortBy === 'title') {
-      filtered.sort((a, b) => {
-        return order === 'desc'
-          ? b.title.toLowerCase().localeCompare(a.title.toLowerCase())
-          : a.title.toLowerCase().localeCompare(b.title.toLowerCase());
-      });
-    }
-
-    // Pagination
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedResults = filtered.slice(startIndex, endIndex);
-
-    res.json({
-      data: paginatedResults,
-      pagination: {
-        page,
-        limit,
-        total: filtered.length,
-        totalPages: Math.ceil(filtered.length / limit),
-        hasNext: endIndex < filtered.length,
-        hasPrev: page > 1,
-      },
+  it('should create a new opportunity', async () => {
+    const res = await request(app).post('/opportunities').send({
+      title: 'Help Kids',
+      description: 'Tutoring children',
+      date: '2025-08-01',
+      location: 'Tbilisi',
+      type: 'Education',
+      requiredSkills: ['Patience', 'Teaching'],
+      status: 'open'
     });
-  } catch (error) {
-    next(error);
-  }
-};
 
-export const getOpportunityById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const opportunities = await readDataFromFile();
-    const opportunity = opportunities.find(op => op.id === req.params.id);
+    expect(res.status).toBe(201);
+    expect(res.body.id).toBeDefined();
+    id = res.body.id;
+  });
 
-    if (!opportunity) {
-      res.status(404).json({ error: 'Opportunity not found' });
-      return;
-    }
+  it('should return all opportunities with pagination', async () => {
+    const res = await request(app).get('/opportunities?page=1&limit=5');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toBeInstanceOf(Array);
+    expect(res.body.pagination).toHaveProperty('page');
+  });
 
-    res.json(opportunity);
-  } catch (error) {
-    next(error);
-  }
-};
+  it('should filter by status', async () => {
+    await request(app).post('/opportunities').send({
+      title: 'Beach Cleanup',
+      description: 'Environmental effort',
+      date: '2025-09-01',
+      location: 'Batumi',
+      type: 'Environmental',
+      status: 'completed',
+      requiredSkills: []
+    });
 
-export const createOpportunity = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { title, description, date, location, type, requiredSkills, status } = req.body;
+    const res = await request(app).get('/opportunities?status=completed');
+    expect(res.body.data.every(op => op.status === 'completed')).toBe(true);
+  });
 
-    // Validation
-    if (
-      typeof title !== 'string' || !title.trim() ||
-      typeof description !== 'string' || !description.trim() ||
-      typeof date !== 'string' || !date.trim() ||
-      typeof location !== 'string' || !location.trim() ||
-      typeof type !== 'string' || !type.trim()
-    ) {
-      res.status(400).json({
-        error: "Missing or invalid required fields: title, description, date, location, and type are required."
+  it('should sort by title descending', async () => {
+    await request(app).post('/opportunities').send({
+      title: 'Zoo Volunteering',
+      description: 'Feed animals',
+      date: '2025-10-01',
+      location: 'Zoo',
+      type: 'Animal care',
+      requiredSkills: ['Responsibility']
+    });
+
+    const res = await request(app).get('/opportunities?sortBy=title&order=desc');
+    const titles = res.body.data.map(o => o.title);
+    const sorted = [...titles].sort((a, b) => b.localeCompare(a));
+    expect(titles).toEqual(sorted);
+  });
+
+  it('should return 404 for unknown ID', async () => {
+    const res = await request(app).get('/opportunities/nonexistent-id');
+    expect(res.status).toBe(404);
+  });
+
+  it('should return error for invalid POST data', async () => {
+    const res = await request(app).post('/opportunities').send({
+      title: '',
+      description: '',
+      date: '',
+      location: '',
+      type: ''
+    });
+    expect(res.status).toBe(400);
+    expect(res.body.errors.length).toBeGreaterThan(0);
+  });
+
+  it('should return error for invalid status or skills on update', async () => {
+    const created = await request(app).post('/opportunities').send({
+      title: 'Park Work',
+      description: 'Plant trees',
+      date: '2025-07-01',
+      location: 'Rustavi',
+      type: 'Environmental'
+    });
+
+    const updateRes = await request(app)
+      .put(`/opportunities/${created.body.id}`)
+      .send({
+        status: 'invalid-status',
+        requiredSkills: ['Gardening', 123] // invalid mixed type
       });
-      return;
-    }
 
-    if (requiredSkills && (!Array.isArray(requiredSkills) || !requiredSkills.every(skill => typeof skill === 'string'))) {
-      res.status(400).json({ error: "requiredSkills must be an array of strings." });
-      return;
-    }
+    expect(updateRes.status).toBe(400);
+    expect(updateRes.body.errors).toContainEqual(
+      expect.stringContaining('Invalid status')
+    );
+  });
 
-    if (status && !['open', 'full', 'completed'].includes(status)) {
-      res.status(400).json({ error: "Invalid status. Must be 'open', 'full', or 'completed'." });
-      return;
-    }
+  it('should delete an opportunity', async () => {
+    const post = await request(app).post('/opportunities').send({
+      title: 'Library',
+      description: 'Sort books',
+      date: '2025-08-15',
+      location: 'Library',
+      type: 'Community'
+    });
 
-    const opportunities = await readDataFromFile();
+    const del = await request(app).delete(`/opportunities/${post.body.id}`);
+    expect(del.status).toBe(204);
 
-    const newOpportunity: VolunteerOpportunity = {
-      id: Date.now().toString(),
-      title: title.trim(),
-      description: description.trim(),
-      date: date.trim(),
-      location: location.trim(),
-      type: type.trim(),
-      requiredSkills: requiredSkills || [],
-      status: status || 'open'
-    };
-
-    opportunities.push(newOpportunity);
-    await writeDataToFile(opportunities);
-
-    res.status(201).json(newOpportunity);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const updateOpportunity = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const opportunities = await readDataFromFile();
-    const index = opportunities.findIndex(op => op.id === req.params.id);
-
-    if (index === -1) {
-      res.status(404).json({ error: 'Opportunity not found' });
-      return;
-    }
-
-    const { title, description, date, location, type, requiredSkills, status } = req.body;
-
-    if (title !== undefined && (typeof title !== 'string' || !title.trim())) {
-      res.status(400).json({ error: "Title must be a non-empty string." });
-      return;
-    }
-
-    if (description !== undefined && (typeof description !== 'string' || !description.trim())) {
-      res.status(400).json({ error: "Description must be a non-empty string." });
-      return;
-    }
-
-    if (date !== undefined && (typeof date !== 'string' || !date.trim())) {
-      res.status(400).json({ error: "Date must be a non-empty string." });
-      return;
-    }
-
-    if (location !== undefined && (typeof location !== 'string' || !location.trim())) {
-      res.status(400).json({ error: "Location must be a non-empty string." });
-      return;
-    }
-
-    if (type !== undefined && (typeof type !== 'string' || !type.trim())) {
-      res.status(400).json({ error: "Type must be a non-empty string." });
-      return;
-    }
-
-    if (requiredSkills !== undefined && (!Array.isArray(requiredSkills) || !requiredSkills.every(skill => typeof skill === 'string'))) {
-      res.status(400).json({ error: "requiredSkills must be an array of strings." });
-      return;
-    }
-
-    if (status !== undefined && !['open', 'full', 'completed'].includes(status)) {
-      res.status(400).json({ error: "Invalid status. Must be 'open', 'full', or 'completed'." });
-      return;
-    }
-
-    const updated: VolunteerOpportunity = {
-      id: req.params.id,
-      title: title?.trim() || opportunities[index].title,
-      description: description?.trim() || opportunities[index].description,
-      date: date?.trim() || opportunities[index].date,
-      location: location?.trim() || opportunities[index].location,
-      type: type?.trim() || opportunities[index].type,
-      requiredSkills: requiredSkills || opportunities[index].requiredSkills,
-      status: status || opportunities[index].status
-    };
-
-    opportunities[index] = updated;
-    await writeDataToFile(opportunities);
-
-    res.json(updated);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const deleteOpportunity = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const opportunities = await readDataFromFile();
-    const index = opportunities.findIndex(op => op.id === req.params.id);
-
-    if (index === -1) {
-      res.status(404).json({ error: 'Opportunity not found' });
-      return;
-    }
-
-    opportunities.splice(index, 1);
-    await writeDataToFile(opportunities);
-
-    res.status(204).send();
-  } catch (error) {
-    next(error);
-  }
-};
+    const check = await request(app).get(`/opportunities/${post.body.id}`);
+    expect(check.status).toBe(404);
+  });
+});
