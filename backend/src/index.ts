@@ -1,3 +1,4 @@
+// src/index.ts
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
@@ -10,7 +11,7 @@ import {
   deleteOpportunity
 } from './controllers/opportunityController';
 import { errorHandler } from './middleware/errorHandler';
-import { apiLimiter } from './middleware/rateLimiter'; // ✅ Import rate limiter
+import { getLimiter, writeLimiter } from './middleware/rateLimiter';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,7 +20,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
-app.use(apiLimiter); // ✅ Apply global rate limiting
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -31,23 +31,23 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Routes
-app.get('/opportunities', getAllOpportunities);
-app.get('/opportunities/:id', getOpportunityById);
-app.post('/opportunities', createOpportunity);
-app.put('/opportunities/:id', updateOpportunity);
-app.delete('/opportunities/:id', deleteOpportunity);
+// Routes with GET rate limit
+app.get('/opportunities', getLimiter, getAllOpportunities);
+app.get('/opportunities/:id', getLimiter, getOpportunityById);
 
-// 404 handler for undefined routes
+// Routes with WRITE rate limit
+app.post('/opportunities', writeLimiter, createOpportunity);
+app.put('/opportunities/:id', writeLimiter, updateOpportunity);
+app.delete('/opportunities/:id', writeLimiter, deleteOpportunity);
+
+// 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Error handling middleware (must be last)
+// Error handler
 app.use(errorHandler);
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
