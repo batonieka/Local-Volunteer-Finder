@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import { VolunteerOpportunity } from '../types';
 import { readDataFromFile, writeDataToFile } from '../utils/fileUtils';
 import { opportunitySchema } from '../validation/opportunitySchema';
-import { logger } from '../utils/logger'; //  Winston logger
+import { logger } from '../utils/logger'; // Winston logger
+import { sendEmailStub } from '../utils/emailService'; // Email stub
 
 // GET /opportunities
 export const getAllOpportunities = async (req: Request, res: Response, next: NextFunction) => {
@@ -29,14 +30,13 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
     let filtered = opportunities;
 
     if (keyword) {
-  filtered = filtered.filter(op =>
-    op.title.toLowerCase().includes(keyword) ||
-    op.description.toLowerCase().includes(keyword) ||
-    op.location.toLowerCase().includes(keyword) ||
-    (op.requiredSkills ?? []).some(skill => skill.toLowerCase().includes(keyword))
-  );
-}
-
+      filtered = filtered.filter(op =>
+        op.title.toLowerCase().includes(keyword) ||
+        op.description.toLowerCase().includes(keyword) ||
+        op.location.toLowerCase().includes(keyword) ||
+        (op.requiredSkills ?? []).some(skill => skill.toLowerCase().includes(keyword))
+      );
+    }
 
     if (type) {
       filtered = filtered.filter(op => op.type.toLowerCase() === type);
@@ -92,7 +92,6 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
   }
 };
 
-
 // GET /opportunities/:id
 export const getOpportunityById = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -135,6 +134,21 @@ export const createOpportunity = async (req: Request, res: Response, next: NextF
 
     opportunities.push(newOpportunity);
     await writeDataToFile(opportunities);
+
+    // 🔔 Simulate sending email
+    sendEmailStub({
+      to: 'admin@example.com',
+      subject: 'New Opportunity Created',
+      message: `
+A new opportunity has been created:
+
+📝 Title: ${newOpportunity.title}
+📍 Location: ${newOpportunity.location}
+📆 Date: ${newOpportunity.date}
+🔖 Type: ${newOpportunity.type}
+📌 Status: ${newOpportunity.status}
+      `
+    });
 
     logger.info(`Created new opportunity: ${newOpportunity.id}`);
     res.status(201).json(newOpportunity);
