@@ -4,6 +4,7 @@ import { readDataFromFile, writeDataToFile } from '../utils/fileUtils';
 import { opportunitySchema } from '../validation/opportunitySchema';
 import { logger } from '../utils/logger'; // Winston logger
 import { sendEmailStub } from '../utils/emailService'; // Email stub
+import Fuse from 'fuse.js';
 
 // GET /opportunities
 export const getAllOpportunities = async (req: Request, res: Response, next: NextFunction) => {
@@ -30,12 +31,13 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
     let filtered = opportunities;
 
     if (keyword) {
-      filtered = filtered.filter(op =>
-        op.title.toLowerCase().includes(keyword) ||
-        op.description.toLowerCase().includes(keyword) ||
-        op.location.toLowerCase().includes(keyword) ||
-        (op.requiredSkills ?? []).some(skill => skill.toLowerCase().includes(keyword))
-      );
+      const fuse = new Fuse(opportunities, {
+        keys: ['title', 'description', 'location', 'requiredSkills'],
+        threshold: 0.4,
+        includeScore: false,
+      });
+      const searchResults = fuse.search(keyword).map(result => result.item);
+      filtered = searchResults;
     }
 
     if (type) {
@@ -225,7 +227,8 @@ export const deleteOpportunity = async (req: Request, res: Response, next: NextF
     next(error);
   }
 };
-  // GET /opportunities/categories
+
+// GET /opportunities/categories
 export const getOpportunityCategories = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const keyword = req.query.keyword?.toString().toLowerCase();

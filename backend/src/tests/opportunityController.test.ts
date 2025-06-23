@@ -10,6 +10,10 @@ import {
 } from '../controllers/opportunityController';
 import { readDataFromFile, writeDataToFile } from '../utils/fileUtils';
 
+// Mock the fileUtils module for fuzzy search tests
+jest.mock('../utils/fileUtils');
+const mockedReadData = readDataFromFile as jest.MockedFunction<typeof readDataFromFile>;
+
 const app = express();
 app.use(express.json());
 
@@ -133,5 +137,53 @@ describe('Opportunity Controller – Advanced Coverage', () => {
 
     const check = await request(app).get(`/opportunities/${post.body.id}`);
     expect(check.status).toBe(404);
+  });
+});
+
+describe('GET /opportunities - fuzzy search', () => {
+  const sampleData = [
+    {
+      id: '1',
+      title: 'Tree Planting Volunteer',
+      description: 'Help us plant trees in the local park.',
+      location: 'New York',
+      date: '2025-12-01',
+      type: 'environment',
+      status: 'open',
+      requiredSkills: ['gardening', 'teamwork'],
+    },
+    {
+      id: '2',
+      title: 'Animal Shelter Helper',
+      description: 'Support daily tasks at the shelter.',
+      location: 'San Francisco',
+      date: '2025-11-01',
+      type: 'animal care',
+      status: 'open',
+      requiredSkills: ['care', 'cleaning'],
+    }
+  ];
+
+  beforeEach(() => {
+    mockedReadData.mockResolvedValue(sampleData as any);
+  });
+
+  it('should return matching opportunities by fuzzy title/description/location/skills', async () => {
+    const res = await request(app).get('/opportunities?keyword=tree');
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0].title).toMatch(/Tree/i);
+  });
+
+  it('should match opportunity by location', async () => {
+    const res = await request(app).get('/opportunities?keyword=francisco');
+    expect(res.status).toBe(200);
+    expect(res.body.data[0].location).toMatch(/San Francisco/i);
+  });
+
+  it('should match opportunity by skills', async () => {
+    const res = await request(app).get('/opportunities?keyword=gardening');
+    expect(res.status).toBe(200);
+    expect(res.body.data[0].requiredSkills).toContain('gardening');
   });
 });
