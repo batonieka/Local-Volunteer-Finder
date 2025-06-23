@@ -1,3 +1,4 @@
+// types.ts
 export interface VolunteerOpportunity {
   id: string;
   title: string;
@@ -5,9 +6,11 @@ export interface VolunteerOpportunity {
   date: string;
   location: string;
   type: string;
-  status: 'open' | 'closed' | 'completed';
+  status?: 'open' | 'full' | 'closed' | 'completed';
   requiredSkills?: string[];
+  favoritedBy?: string[]; // user IDs (e.g. 'user123')
 }
+
 
 export interface VolunteerApplication {
   id: string;
