@@ -5,7 +5,15 @@ export interface VolunteerOpportunity {
   date: string;
   location: string;
   type: string;
-  status?: 'open' | 'full' | 'completed';
+  status: 'open' | 'closed' | 'completed';
   requiredSkills?: string[];
-  favoritedBy?: string[]; // user IDs (e.g. 'user123')
+}
+
+export interface VolunteerApplication {
+  id: string;
+  opportunityId: string;
+  name: string;
+  email: string;
+  message: string;
+  submittedAt: string;
 }

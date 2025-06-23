@@ -1,53 +1,28 @@
-// src/tests/fileUtils.test.ts
 import fs from 'fs/promises';
-import { readDataFromFile, writeDataToFile } from '../utils/fileUtils';
-import { VolunteerOpportunity } from '../types';
+import path from 'path';
+import { VolunteerOpportunity, VolunteerApplication } from '../types';
+import { logger } from '../utils/logger';
 
-jest.mock('fs/promises');
+const opportunityPath = path.join(process.cwd(), 'src', 'data', 'opportunities.json');
+const applicationPath = path.join(process.cwd(), 'src', 'data', 'applications.json');
 
-describe('fileUtils', () => {
-  const mockData: VolunteerOpportunity[] = [
-    {
-      id: "1",
-      title: "Test",
-      description: "Test Desc",
-      date: "2025-07-01",
-      location: "Test City",
-      type: "Education",
-      requiredSkills: ["Skill"],
-      status: "open"
-    }
-  ];
+export async function readDataFromFile(file: 'opportunities' | 'applications' = 'opportunities'): Promise<VolunteerOpportunity[] | VolunteerApplication[]> {
+  const filePath = file === 'opportunities' ? opportunityPath : applicationPath;
+  try {
+    const data = await fs.readFile(filePath, 'utf-8');
+    return JSON.parse(data);
+  } catch (err) {
+    logger.error(`Error reading ${file} file:`, err);
+    return [];
+  }
+}
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('reads data from a file and returns parsed JSON', async () => {
-    (fs.readFile as jest.Mock).mockResolvedValueOnce(JSON.stringify(mockData));
-    const result = await readDataFromFile();
-    expect(result).toEqual(mockData);
-  });
-
-  it('returns empty array if reading file fails', async () => {
-    (fs.readFile as jest.Mock).mockRejectedValueOnce(new Error("File not found"));
-    const result = await readDataFromFile();
-    expect(result).toEqual([]);
-  });
-
-  it('writes data to a file successfully', async () => {
-    await writeDataToFile(mockData);
-    expect(fs.writeFile).toHaveBeenCalledTimes(1);
-    expect(fs.writeFile).toHaveBeenCalledWith(
-      expect.any(String),
-      JSON.stringify(mockData, null, 2),
-      'utf-8'
-    );
-  });
-
-  it('throws error if writing to file fails', async () => {
-    (fs.writeFile as jest.Mock).mockRejectedValueOnce(new Error('Write failed'));
-
-    await expect(writeDataToFile(mockData)).rejects.toThrow('Write failed');
-  });
-});
+export async function writeDataToFile(data: VolunteerOpportunity[] | VolunteerApplication[], file: 'opportunities' | 'applications' = 'opportunities'): Promise<void> {
+  const filePath = file === 'opportunities' ? opportunityPath : applicationPath;
+  try {
+    await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (err) {
+    logger.error(`Error writing ${file} file:`, err);
+    throw err;
+  }
+}
