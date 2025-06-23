@@ -14,6 +14,7 @@ import { errorHandler } from './middleware/errorHandler';
 import { getLimiter, writeLimiter } from './middleware/rateLimiter';
 import { toggleFavoriteOpportunity, getFavoritesByUser } from './controllers/favoriteController';
 import { getOpportunityCategories } from './controllers/opportunityController';
+import { auditLogger } from './middleware/auditLogger';
 
 
 const app = express();
@@ -60,4 +61,6 @@ app.get('/favorites/:userId', getFavoritesByUser);
 app.post('/opportunities/:id/favorite/:userId', toggleFavoriteOpportunity);
 
 app.get('/opportunities/categories', getOpportunityCategories);
+
+app.use(auditLogger);
 
