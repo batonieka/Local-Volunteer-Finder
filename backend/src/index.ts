@@ -13,6 +13,7 @@ import {
 import { errorHandler } from './middleware/errorHandler';
 import { getLimiter, writeLimiter } from './middleware/rateLimiter';
 import { toggleFavoriteOpportunity, getFavoritesByUser } from './controllers/favoriteController';
+import { getOpportunityCategories } from './controllers/opportunityController';
 
 
 const app = express();
@@ -57,4 +58,6 @@ app.listen(PORT, () => {
 
 app.get('/favorites/:userId', getFavoritesByUser);
 app.post('/opportunities/:id/favorite/:userId', toggleFavoriteOpportunity);
+
+app.get('/opportunities/categories', getOpportunityCategories);
 

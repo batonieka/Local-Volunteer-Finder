@@ -225,3 +225,28 @@ export const deleteOpportunity = async (req: Request, res: Response, next: NextF
     next(error);
   }
 };
+  // GET /opportunities/categories
+export const getOpportunityCategories = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const keyword = req.query.keyword?.toString().toLowerCase();
+    const opportunities = await readDataFromFile();
+
+    const categoriesSet = new Set<string>();
+
+    opportunities.forEach(op => {
+      if (!op.type) return;
+      const type = op.type.trim();
+      if (!keyword || type.toLowerCase().includes(keyword)) {
+        categoriesSet.add(type);
+      }
+    });
+
+    const categories = Array.from(categoriesSet).sort((a, b) => a.localeCompare(b));
+
+    logger.info(`Fetched ${categories.length} opportunity categories`);
+    res.json({ categories });
+  } catch (error) {
+    logger.error(`Failed to fetch opportunity categories: ${(error as Error).message}`);
+    next(error);
+  }
+};
