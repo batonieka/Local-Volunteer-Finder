@@ -17,6 +17,7 @@ import { toggleFavoriteOpportunity, getFavoritesByUser } from './controllers/fav
 import { auditLogger } from './middleware/auditLogger';
 import applicationRoutes from './routes/applicationRoutes';
 import authRoutes from './routes/authRoutes';
+import { getTopViewedOpportunities } from './controllers/opportunityController';
 
 
 
@@ -69,3 +70,5 @@ app.listen(PORT, () => {
 });
 
 app.use('/auth', authRoutes);
+
+app.get('/opportunities/top-viewed', getTopViewedOpportunities);

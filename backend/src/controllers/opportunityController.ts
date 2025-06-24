@@ -95,23 +95,29 @@ export const getAllOpportunities = async (req: Request, res: Response, next: Nex
 };
 
 // GET /opportunities/:id
+// In getOpportunityById inside opportunityController.ts
 export const getOpportunityById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const opportunities = await readDataFromFile();
-    const opportunity = opportunities.find(op => op.id === req.params.id);
+    const index = opportunities.findIndex(op => op.id === req.params.id);
 
-    if (!opportunity) {
+    if (index === -1) {
       logger.warn(`Opportunity not found: ${req.params.id}`);
       return res.status(404).json({ error: 'Opportunity not found' });
     }
 
-    logger.info(`Fetched opportunity ID: ${req.params.id}`);
-    res.json(opportunity);
+    //  Increment view count
+    opportunities[index].views = (opportunities[index].views || 0) + 1;
+    await writeDataToFile(opportunities);
+
+    logger.info(`Viewed opportunity ID: ${req.params.id} (Views: ${opportunities[index].views})`);
+    res.json(opportunities[index]);
   } catch (error) {
     logger.error(`Error fetching opportunity by ID: ${(error as Error).message}`);
     next(error);
   }
 };
+
 
 // POST /opportunities
 export const createOpportunity = async (req: Request, res: Response, next: NextFunction) => {
@@ -250,6 +256,20 @@ export const getOpportunityCategories = async (req: Request, res: Response, next
     res.json({ categories });
   } catch (error) {
     logger.error(`Failed to fetch opportunity categories: ${(error as Error).message}`);
+    next(error);
+  }
+};
+// Add to opportunityController.ts
+export const getTopViewedOpportunities = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const opportunities = await readDataFromFile();
+    const sorted = opportunities
+      .slice()
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 10);
+
+    res.json({ topViewed: sorted });
+  } catch (error) {
     next(error);
   }
 };

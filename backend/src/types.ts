@@ -6,10 +6,12 @@ export interface VolunteerOpportunity {
   date: string;
   location: string;
   type: string;
-  status?: 'open' | 'full' | 'closed' | 'completed';
+  status?: 'open' | 'closed' | 'completed';
   requiredSkills?: string[];
-  favoritedBy?: string[]; // user IDs (e.g. 'user123')
+  favoritedBy?: string[];
+  views?: number; // 
 }
+
 
 
 export interface VolunteerApplication {
