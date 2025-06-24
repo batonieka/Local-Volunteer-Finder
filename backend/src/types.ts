@@ -20,3 +20,8 @@ export interface VolunteerApplication {
   message: string;
   submittedAt: string;
 }
+export interface UserPayload {
+  id: string;
+  email: string;
+  role?: string;
+}

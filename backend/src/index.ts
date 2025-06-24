@@ -16,6 +16,9 @@ import { getLimiter, writeLimiter } from './middleware/rateLimiter';
 import { toggleFavoriteOpportunity, getFavoritesByUser } from './controllers/favoriteController';
 import { auditLogger } from './middleware/auditLogger';
 import applicationRoutes from './routes/applicationRoutes';
+import authRoutes from './routes/authRoutes';
+
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -64,3 +67,5 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
+
+app.use('/auth', authRoutes);

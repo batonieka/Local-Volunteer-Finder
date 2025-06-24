@@ -20,7 +20,7 @@ export const toggleFavoriteOpportunity = async (req: Request, res: Response, nex
     const isFavorite = opportunity.favoritedBy.includes(userId);
 
     if (isFavorite) {
-      opportunity.favoritedBy = opportunity.favoritedBy.filter(id => id !== userId);
+      opportunity.favoritedBy = opportunity.favoritedBy.filter((id: string) => id !== userId);
     } else {
       opportunity.favoritedBy.push(userId);
     }
