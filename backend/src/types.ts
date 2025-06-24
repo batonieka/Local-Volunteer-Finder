@@ -9,8 +9,10 @@ export interface VolunteerOpportunity {
   status?: 'open' | 'closed' | 'completed';
   requiredSkills?: string[];
   favoritedBy?: string[];
-  views?: number; // 
+  views?: number;
+  reminderSent?: boolean; 
 }
+
 
 
 

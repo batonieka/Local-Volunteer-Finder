@@ -18,6 +18,8 @@ import { auditLogger } from './middleware/auditLogger';
 import applicationRoutes from './routes/applicationRoutes';
 import authRoutes from './routes/authRoutes';
 import { getTopViewedOpportunities } from './controllers/opportunityController';
+import { checkAndSendReminders } from './utils/reminderService';
+import { logger } from './utils/logger';
 
 
 
@@ -72,3 +74,7 @@ app.listen(PORT, () => {
 app.use('/auth', authRoutes);
 
 app.get('/opportunities/top-viewed', getTopViewedOpportunities);
+
+setInterval(() => {
+  checkAndSendReminders().catch(err => logger.error('Reminder error:', err));
+}, 600000);
